@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: net.unicoen
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: net.unicoen; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.xtext.xbase,
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.13.0",
+ org.antlr.runtime,
+ org.eclipse.xtext.util,
+ org.eclipse.emf.common,
+ org.eclipse.xtend.lib;bundle-version="2.13.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: net.unicoen.generator,
+ net.unicoen.services,
+ net.unicoen.uniMapperGenerator,
+ net.unicoen.serializer,
+ net.unicoen.scoping,
+ net.unicoen.parser.antlr.internal,
+ net.unicoen.validation,
+ net.unicoen.uniMapperGenerator.util,
+ net.unicoen.uniMapperGenerator.impl,
+ net.unicoen.parser.antlr,
+ net.unicoen
+Import-Package: org.apache.log4j

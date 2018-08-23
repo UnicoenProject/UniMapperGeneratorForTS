@@ -1,0 +1,9 @@
+diff a/net.unicoen/src/net/unicoen/generator/UniMapperGeneratorGenerator.xtend b/net.unicoen/src/net/unicoen/generator/UniMapperGeneratorGenerator.xtend	(rejected hunks)
+@@ -310,7 +310,6 @@
+ 			    }
+ 			
+ 			    if (obj instanceof Map) {
+-			      if (obj.size === 1) {
+ 			      for (const value of obj.values()) {
+ 					return this.flatten(value);
+ 				  }

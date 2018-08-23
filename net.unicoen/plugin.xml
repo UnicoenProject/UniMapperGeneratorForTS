@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="windows-31j"?>
+<?eclipse version="3.0"?>
+<plugin>
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<package 
+			uri = "http://www.unicoen.net/UniMapperGenerator"
+			class = "net.unicoen.uniMapperGenerator.UniMapperGeneratorPackage"
+			genModel = "model/generated/UniMapperGenerator.genmodel" />
+	</extension>
+</plugin>
