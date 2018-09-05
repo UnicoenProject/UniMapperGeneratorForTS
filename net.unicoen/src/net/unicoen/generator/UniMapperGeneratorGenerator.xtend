@@ -36,70 +36,88 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 		]
 	}
 	
-	def generateImports() '''
-		import CodeLocation from '../../node_helper/CodeLocation';
-		import CodeRange from '../../node_helper/CodeRange';
-		import UniNode from '../../node/UniNode';
-		import UniParam from '../../node/UniParam';
-		import UniEnhancedFor from '../../node/UniEnhancedFor';
-		import UniExpr from '../../node/UniExpr';
-		import UniArray from '../../node/UniArray';
-		import UniNumberLiteral from '../../node/UniNumberLiteral';
-		import UniBinOp from '../../node/UniBinOp';
-		import UniBlock from '../../node/UniBlock';
-		import UniBoolLiteral from '../../node/UniBoolLiteral';
-		import UniBreak from '../../node/UniBreak';
-		import UniCast from '../../node/UniCast';
-		import UniContinue from '../../node/UniContinue';
-		import UniClassDec from '../../node/UniClassDec';
-		import UniDecralation from '../../node/UniDecralation';
-		import UniDoWhile from '../../node/UniDoWhile';
-		import UniEmptyStatement from '../../node/UniEmptyStatement';
-		import UniFunctionDec from '../../node/UniFunctionDec';
-		import UniFor from '../../node/UniFor';
-		import UniIdent from '../../node/UniIdent';
-		import UniIf from '../../node/UniIf';
-		import UniIntLiteral from '../../node/UniIntLiteral';		
-		import UniDoubleLiteral from '../../node/UniDoubleLiteral';
-		import UniCharacterLiteral from '../../node/UniCharacterLiteral';
-		import UniWhile from '../../node/UniWhile';
-		import UniUnaryOp from '../../node/UniUnaryOp';
-		import UniTernaryOp from '../../node/UniTernaryOp';
-		import UniNewArray from '../../node/UniNewArray';
-		import UniNew from '../../node/UniNew';
-		import UniStatement from '../../node/UniStatement';
-		import UniStringLiteral from '../../node/UniStringLiteral';
-		import UniReturn from '../../node/UniReturn';
-		import UniVariableDec from '../../node/UniVariableDec';
-		import UniVariableDef from '../../node/UniVariableDef';
-		import UniSwitchUnit from '../../node/UniSwitchUnit';
-		import UniSwitch from '../../node/UniSwitch';
-		import UniMethodCall from '../../node/UniMethodCall';
-		import UniProgram from '../../node/UniProgram';
+	def generateImports(Grammar g) '''
+		import { 
+			ANTLRInputStream, 
+			CommonTokenStream, 
+			ParserRuleContext, 
+			RuleContext, 
+			Token 
+		} from 'antlr4ts';
 		
-		import { InputStream, CommonTokenStream, ParserRuleContext } from 'antlr4';
-		import { Token }from 'antlr4/Token';
-		import { RuleContext }from 'antlr4/RuleContext';
-		import { TerminalNode, TerminalNodeImpl, RuleNode, ParseTree }from 'antlr4/tree/Tree';
+		import { ParseTree } from "antlr4ts/tree/ParseTree";
+		import { RuleNode } from "antlr4ts/tree/RuleNode";
+		import { ErrorNode } from "antlr4ts/tree/ErrorNode";
+		import { TerminalNode } from "antlr4ts/tree/TerminalNode";
+		
 		import { «_grammarName»Lexer } from './«_grammarName»Lexer';
 		import { «_grammarName»Parser } from './«_grammarName»Parser';
 		import { «_grammarName»Visitor } from './«_grammarName»Visitor';
+				
+		import { 
+		«FOR r : g.rules.filter(ParserRule)»
+			«IF !(r.type !== null && r.type.type.name !== null && r.type.type.name.endsWith("Literal"))
+			&& r.type !== null || r.eAllContents.filter(Element).findFirst[it.op !== null] !== null»			
+				«r.name.toCamelCase»Context,
+			«ENDIF»
+		«ENDFOR»
+			} from "./«_grammarName»Parser";
+		
+		import { CodeLocation } from '../../node_helper/CodeLocation';
+		import { CodeRange } from '../../node_helper/CodeRange';
+		import { UniNode } from '../../node/UniNode';
+		import { UniParam } from '../../node/UniParam';
+		import { UniEnhancedFor } from '../../node/UniEnhancedFor';
+		import { UniExpr } from '../../node/UniExpr';
+		import { UniArray } from '../../node/UniArray';
+		import { UniNumberLiteral } from '../../node/UniNumberLiteral';
+		import { UniBinOp } from '../../node/UniBinOp';
+		import { UniBlock } from '../../node/UniBlock';
+		import { UniBoolLiteral } from '../../node/UniBoolLiteral';
+		import { UniBreak } from '../../node/UniBreak';
+		import { UniCharacterLiteral } from '../../node/UniCharacterLiteral';
+		import { UniCast } from '../../node/UniCast';
+		import { UniContinue } from '../../node/UniContinue';
+		import { UniClassDec } from '../../node/UniClassDec';
+		import { UniDecralation } from '../../node/UniDecralation';	
+		import { UniDoubleLiteral } from '../../node/UniDoubleLiteral';
+		import { UniDoWhile } from '../../node/UniDoWhile';	
+		import { UniEmptyStatement } from '../../node/UniEmptyStatement';
+		import { UniFunctionDec } from '../../node/UniFunctionDec';
+		import { UniFor } from '../../node/UniFor';
+		import { UniIdent } from '../../node/UniIdent';
+		import { UniIf } from '../../node/UniIf';
+		import { UniIntLiteral } from '../../node/UniIntLiteral';		
+		import { UniMethodCall } from '../../node/UniMethodCall';
+		import { UniNew } from '../../node/UniNew';
+		import { UniNewArray } from '../../node/UniNewArray';
+		import { UniWhile } from '../../node/UniWhile';
+		import { UniUnaryOp } from '../../node/UniUnaryOp';
+		import { UniTernaryOp } from '../../node/UniTernaryOp';
+		import { UniStatement } from '../../node/UniStatement';
+		import { UniStringLiteral } from '../../node/UniStringLiteral';
+		import { UniReturn } from '../../node/UniReturn';
+		import { UniVariableDec } from '../../node/UniVariableDec';
+		import { UniVariableDef } from '../../node/UniVariableDef';
+		import { UniSwitchUnit } from '../../node/UniSwitchUnit';
+		import { UniSwitch } from '../../node/UniSwitch';
+		import { UniProgram } from '../../node/UniProgram';
 	'''
 
 	def generateMapper(Grammar g) '''
 		// tslint:disable
-		«generateImports»
+		«g.generateImports»
 		
 		class Comment {
 			constructor(readonly contents:string[], public parent:ParseTree){
 			}
 		}
 		
-		export default class «_grammarName»Mapper extends «_grammarName»Visitor {
+		export class «_grammarName»Mapper implements «_grammarName»Visitor<any> {
 		
 			private isDebugMode:boolean = false;
 			private parser:«_grammarName»Parser;
-			private _comments:Comment[] = [];
+			private	_comments:Comment[] = [];
 			private _lastNode:UniNode;
 			private _nextTokenIndex:number;
 			private _stream:CommonTokenStream;
@@ -109,25 +127,23 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 			}
 			
 			getRawTree(code) {
-				const chars = new InputStream(code);
+				const chars = new ANTLRInputStream(code);
 				const lexer = new «_grammarName»Lexer(chars);
 				const tokens = new CommonTokenStream(lexer);
 				this.parser = new «_grammarName»Parser(tokens);
-				this.parser.buildParseTrees = true;
 				const tree = this.parser.translationunit();
 				return [tree, this.parser];
 			}
 		
-			parse(code) {
-				return this.parseCore(new InputStream(code));
+			parse(code:string) {
+				return this.parseCore(new ANTLRInputStream(code));
 			}
 		
 			
-			parseCore(chars) {
+			parseCore(chars:ANTLRInputStream) {
 				const lexer = new «_grammarName»Lexer(chars);
 				const tokens = new CommonTokenStream(lexer);
 				this.parser = new «_grammarName»Parser(tokens);
-				this.parser.buildParseTrees = true;
 				const tree = this.parser.«g.root.root.name»();
 		
 				this._comments = [];
@@ -139,13 +155,13 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 				ret.codeRange = ret.block.codeRange;
 				
 				if (this._lastNode !== null) {
-					const count = this._stream.tokens.length - 1
+					const count = this._stream.getTokens().length - 1
 					for (var i = this._nextTokenIndex; i < count; i++) {
-						const hiddenToken = this._stream.tokens[i]; // Includes skipped tokens (maybe)
+						const hiddenToken = this._stream.getTokens()[i]; // Includes skipped tokens (maybe)
 						if (this._lastNode.comments === null) {
 							this._lastNode.comments = [];
 						}
-						this._lastNode.comments += hiddenToken.text
+						this._lastNode.comments.push(hiddenToken.text);
 					}
 				}
 				return ret;
@@ -171,7 +187,7 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 			}*/
 
 			public visitChildren(node:RuleNode) {
-				const n = node.getChildCount();
+				const n = node.childCount;
 				const list:any[] = [];
 				for (let i = 0; i < n;++i) {
 					const c = node.getChild(i);
@@ -199,12 +215,12 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 		
 				const node = (Array.isArray(result) && result.length == 1) ? result[0] : result;
 				if (node instanceof UniNode) {
-					if(tree instanceof RuleContext) {
+					if(tree instanceof ParserRuleContext) {
 						const start = tree.start;
-						const begin = new CodeLocation(start.column,start.line);
+						const begin = new CodeLocation(start.charPositionInLine,start.line);
 						const stop = tree.stop;
-						const endPos = stop.column;
-						const length = 1 + stop.stop - stop.start;
+						const endPos = stop.charPositionInLine;
+						const length = 1 + stop.stopIndex - stop.startIndex;
 						const end = new CodeLocation(endPos + length, stop.line);
 						node.codeRange = new CodeRange(begin,end);
 					}
@@ -235,7 +251,7 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 
 			isNonEmptyNode(node:ParseTree):boolean {
 				if (node instanceof ParserRuleContext) {
-					const n = node.getChildCount();
+					const n = node.childCount;
 					if (n > 1) {
 					return true;
 					}
@@ -245,6 +261,10 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 					return true;
 				}
 			}
+			
+			visitErrorNode(node: ErrorNode): UniNode{
+				return null;
+			}			
 			
 			getRuleName(node) {
 				return this.parser.ruleNames[node.ruleIndex];
@@ -261,20 +281,20 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 					const contents:string[] = [];
 					let i = this._nextTokenIndex;
 					for (; i < count; i++) {
-						const hiddenToken = this._stream.tokens[i]; // Includes skipped tokens (maybe)
-						if (this._lastNode !== null && this._stream.tokens[this._nextTokenIndex - 1].line == hiddenToken.line) {
+						const hiddenToken = this._stream.getTokens()[i]; // Includes skipped tokens (maybe)
+						if (this._lastNode !== null && this._stream.getTokens()[this._nextTokenIndex - 1].line == hiddenToken.line) {
 							if (this._lastNode.comments === null) {
 								this._lastNode.comments = [];
 							}
-							this._lastNode.comments += hiddenToken.text;
+							this._lastNode.comments.push(hiddenToken.text);
 						} else {
 							contents.push(hiddenToken.text);
 						}
 					}
-					const count2 = this._stream.tokens.length - 1;
-					for (i = count + 1; i < count2 && this._stream.tokens[i].channel == Token.HIDDEN_CHANNEL &&
-						this._stream.tokens[count].line == this._stream.tokens[i].line; i++) {
-						contents.push(this._stream.tokens[i].text);
+					const count2 = this._stream.getTokens().length - 1;
+					for (i = count + 1; i < count2 && this._stream.getTokens()[i].channel == Token.HIDDEN_CHANNEL &&
+						this._stream.getTokens()[count].line == this._stream.getTokens()[i].line; i++) {
+						contents.push(this._stream.getTokens()[i].text);
 					}
 					if (contents.length > 0) {
 						this._comments.push(new Comment(contents, node.parent));
@@ -449,7 +469,7 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 			new String
 		}
 		'''
-			public visit«ruleName»(ctx:«_grammarName»Parser.«ruleName»Context) {
+			public visit«ruleName»(ctx:«ruleName»Context) {
 				«IF typeName=="List"»
 					«r.makeListMethodBody(r.type.type.typevalue)»
 				«ELSE»
@@ -479,7 +499,7 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 		«IF hasMerge»
 		const merge = [];
 		«ENDIF»
-		const n = ctx.getChildCount();
+		const n = ctx.childCount;
 		for (let i = 0; i < n;++i) {
 			const it = ctx.getChild(i);	
 			if (it instanceof RuleContext) {
@@ -536,14 +556,16 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 		«ENDIF»
 		«IF r.type !== null»
 			«IF r.type.type.name !== null»
-				let node = this.castTo(map, «r.type.type.name»);
 				«IF hasMerge»
+				let node = this.castTo(map, «r.type.type.name»);
 				if(typeof node === 'object' && 'merge' in node){
 					merge.forEach((it:any) => { node.merge(this.castTo(it, «r.type.type.name»));});
 				} else {
 					node = new «r.type.type.name»();
 					merge.forEach((it:any) => { node.merge(this.castTo(it, «r.type.type.name»));});
 				}
+				«ELSE»
+				const node = this.castTo(map, «r.type.type.name»);
 				«ENDIF»
 				return node;
 			«ELSE»
@@ -640,7 +662,7 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 		«IF hasMerge»
 		const merge = [];
 		«ENDIF»
-		const n = ctx.getChildCount();
+		const n = ctx.childCount;
 		if (0<n) {
 			for (let i = 0; i < n;++i) {
 				const it = ctx.getChild(i);
@@ -727,7 +749,7 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 		const map = new Map<string, any>();
 		const none = [];
 		map.set("none", none);
-		const n = node.getChildCount();
+		const n = node.childCount;
 		for (let i = 0; i < n;++i) {
 			const it = node.getChild(i);
 			none.push(this.visit(it));
@@ -738,12 +760,12 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 
 	def makeLiteralMethod(ParserRule r) '''
 		«val methodName = "visit" + r.name.toCamelCase»
-		public «methodName»(ctx:«_grammarName»Parser.«r.name.toCamelCase»Context) {
+		public «methodName»(ctx:«r.name.toCamelCase»Context) {
 			const findFirst = (ctx) => {
-				const n = ctx.getChildCount();
+				const n = ctx.childCount;
 				for (let i = 0; i < n;++i) {
 					const it = ctx.getChild(i);	
-					if (it instanceof TerminalNodeImpl) {
+					if (it instanceof TerminalNode) {
 						«FOR it : r.eAllContents.filter(Element).toList»
 							«IF it.op !== null»
 								«IF it.op == "value"»

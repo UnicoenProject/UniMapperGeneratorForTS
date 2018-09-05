@@ -60,94 +60,36 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     IteratorExtensions.<Grammar>forEach(Iterators.<Grammar>filter(resource.getAllContents(), Grammar.class), _function);
   }
   
-  public CharSequence generateImports() {
+  public CharSequence generateImports(final Grammar g) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("import CodeLocation from \'../../node_helper/CodeLocation\';");
+    _builder.append("import { ");
     _builder.newLine();
-    _builder.append("import CodeRange from \'../../node_helper/CodeRange\';");
+    _builder.append("\t");
+    _builder.append("ANTLRInputStream, ");
     _builder.newLine();
-    _builder.append("import UniNode from \'../../node/UniNode\';");
+    _builder.append("\t");
+    _builder.append("CommonTokenStream, ");
     _builder.newLine();
-    _builder.append("import UniParam from \'../../node/UniParam\';");
+    _builder.append("\t");
+    _builder.append("ParserRuleContext, ");
     _builder.newLine();
-    _builder.append("import UniEnhancedFor from \'../../node/UniEnhancedFor\';");
+    _builder.append("\t");
+    _builder.append("RuleContext, ");
     _builder.newLine();
-    _builder.append("import UniExpr from \'../../node/UniExpr\';");
+    _builder.append("\t");
+    _builder.append("Token ");
     _builder.newLine();
-    _builder.append("import UniArray from \'../../node/UniArray\';");
-    _builder.newLine();
-    _builder.append("import UniNumberLiteral from \'../../node/UniNumberLiteral\';");
-    _builder.newLine();
-    _builder.append("import UniBinOp from \'../../node/UniBinOp\';");
-    _builder.newLine();
-    _builder.append("import UniBlock from \'../../node/UniBlock\';");
-    _builder.newLine();
-    _builder.append("import UniBoolLiteral from \'../../node/UniBoolLiteral\';");
-    _builder.newLine();
-    _builder.append("import UniBreak from \'../../node/UniBreak\';");
-    _builder.newLine();
-    _builder.append("import UniCast from \'../../node/UniCast\';");
-    _builder.newLine();
-    _builder.append("import UniContinue from \'../../node/UniContinue\';");
-    _builder.newLine();
-    _builder.append("import UniClassDec from \'../../node/UniClassDec\';");
-    _builder.newLine();
-    _builder.append("import UniDecralation from \'../../node/UniDecralation\';");
-    _builder.newLine();
-    _builder.append("import UniDoWhile from \'../../node/UniDoWhile\';");
-    _builder.newLine();
-    _builder.append("import UniEmptyStatement from \'../../node/UniEmptyStatement\';");
-    _builder.newLine();
-    _builder.append("import UniFunctionDec from \'../../node/UniFunctionDec\';");
-    _builder.newLine();
-    _builder.append("import UniFor from \'../../node/UniFor\';");
-    _builder.newLine();
-    _builder.append("import UniIdent from \'../../node/UniIdent\';");
-    _builder.newLine();
-    _builder.append("import UniIf from \'../../node/UniIf\';");
-    _builder.newLine();
-    _builder.append("import UniIntLiteral from \'../../node/UniIntLiteral\';\t\t");
-    _builder.newLine();
-    _builder.append("import UniDoubleLiteral from \'../../node/UniDoubleLiteral\';");
-    _builder.newLine();
-    _builder.append("import UniCharacterLiteral from \'../../node/UniCharacterLiteral\';");
-    _builder.newLine();
-    _builder.append("import UniWhile from \'../../node/UniWhile\';");
-    _builder.newLine();
-    _builder.append("import UniUnaryOp from \'../../node/UniUnaryOp\';");
-    _builder.newLine();
-    _builder.append("import UniTernaryOp from \'../../node/UniTernaryOp\';");
-    _builder.newLine();
-    _builder.append("import UniNewArray from \'../../node/UniNewArray\';");
-    _builder.newLine();
-    _builder.append("import UniNew from \'../../node/UniNew\';");
-    _builder.newLine();
-    _builder.append("import UniStatement from \'../../node/UniStatement\';");
-    _builder.newLine();
-    _builder.append("import UniStringLiteral from \'../../node/UniStringLiteral\';");
-    _builder.newLine();
-    _builder.append("import UniReturn from \'../../node/UniReturn\';");
-    _builder.newLine();
-    _builder.append("import UniVariableDec from \'../../node/UniVariableDec\';");
-    _builder.newLine();
-    _builder.append("import UniVariableDef from \'../../node/UniVariableDef\';");
-    _builder.newLine();
-    _builder.append("import UniSwitchUnit from \'../../node/UniSwitchUnit\';");
-    _builder.newLine();
-    _builder.append("import UniSwitch from \'../../node/UniSwitch\';");
-    _builder.newLine();
-    _builder.append("import UniMethodCall from \'../../node/UniMethodCall\';");
-    _builder.newLine();
-    _builder.append("import UniProgram from \'../../node/UniProgram\';");
+    _builder.append("} from \'antlr4ts\';");
     _builder.newLine();
     _builder.newLine();
-    _builder.append("import { InputStream, CommonTokenStream, ParserRuleContext } from \'antlr4\';");
+    _builder.append("import { ParseTree } from \"antlr4ts/tree/ParseTree\";");
     _builder.newLine();
-    _builder.append("import { Token }from \'antlr4/Token\';");
+    _builder.append("import { RuleNode } from \"antlr4ts/tree/RuleNode\";");
     _builder.newLine();
-    _builder.append("import { RuleContext }from \'antlr4/RuleContext\';");
+    _builder.append("import { ErrorNode } from \"antlr4ts/tree/ErrorNode\";");
     _builder.newLine();
-    _builder.append("import { TerminalNode, TerminalNodeImpl, RuleNode, ParseTree }from \'antlr4/tree/Tree\';");
+    _builder.append("import { TerminalNode } from \"antlr4ts/tree/TerminalNode\";");
+    _builder.newLine();
     _builder.newLine();
     _builder.append("import { ");
     _builder.append(this._grammarName);
@@ -167,6 +109,110 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append(this._grammarName);
     _builder.append("Visitor\';");
     _builder.newLineIfNotEmpty();
+    _builder.append("\t\t");
+    _builder.newLine();
+    _builder.append("import { ");
+    _builder.newLine();
+    {
+      Iterable<ParserRule> _filter = Iterables.<ParserRule>filter(g.getRules(), ParserRule.class);
+      for(final ParserRule r : _filter) {
+        {
+          if ((((!(((r.getType() != null) && (r.getType().getType().getName() != null)) && r.getType().getType().getName().endsWith("Literal"))) && (r.getType() != null)) || (IteratorExtensions.<Element>findFirst(Iterators.<Element>filter(r.eAllContents(), Element.class), ((Function1<Element, Boolean>) (Element it) -> {
+            String _op = it.getOp();
+            return Boolean.valueOf((_op != null));
+          })) != null))) {
+            String _camelCase = this.toCamelCase(r.getName());
+            _builder.append(_camelCase);
+            _builder.append("Context,");
+            _builder.newLineIfNotEmpty();
+          }
+        }
+      }
+    }
+    _builder.append("\t");
+    _builder.append("} from \"./");
+    _builder.append(this._grammarName, "\t");
+    _builder.append("Parser\";");
+    _builder.newLineIfNotEmpty();
+    _builder.newLine();
+    _builder.append("import { CodeLocation } from \'../../node_helper/CodeLocation\';");
+    _builder.newLine();
+    _builder.append("import { CodeRange } from \'../../node_helper/CodeRange\';");
+    _builder.newLine();
+    _builder.append("import { UniNode } from \'../../node/UniNode\';");
+    _builder.newLine();
+    _builder.append("import { UniParam } from \'../../node/UniParam\';");
+    _builder.newLine();
+    _builder.append("import { UniEnhancedFor } from \'../../node/UniEnhancedFor\';");
+    _builder.newLine();
+    _builder.append("import { UniExpr } from \'../../node/UniExpr\';");
+    _builder.newLine();
+    _builder.append("import { UniArray } from \'../../node/UniArray\';");
+    _builder.newLine();
+    _builder.append("import { UniNumberLiteral } from \'../../node/UniNumberLiteral\';");
+    _builder.newLine();
+    _builder.append("import { UniBinOp } from \'../../node/UniBinOp\';");
+    _builder.newLine();
+    _builder.append("import { UniBlock } from \'../../node/UniBlock\';");
+    _builder.newLine();
+    _builder.append("import { UniBoolLiteral } from \'../../node/UniBoolLiteral\';");
+    _builder.newLine();
+    _builder.append("import { UniBreak } from \'../../node/UniBreak\';");
+    _builder.newLine();
+    _builder.append("import { UniCharacterLiteral } from \'../../node/UniCharacterLiteral\';");
+    _builder.newLine();
+    _builder.append("import { UniCast } from \'../../node/UniCast\';");
+    _builder.newLine();
+    _builder.append("import { UniContinue } from \'../../node/UniContinue\';");
+    _builder.newLine();
+    _builder.append("import { UniClassDec } from \'../../node/UniClassDec\';");
+    _builder.newLine();
+    _builder.append("import { UniDecralation } from \'../../node/UniDecralation\';\t");
+    _builder.newLine();
+    _builder.append("import { UniDoubleLiteral } from \'../../node/UniDoubleLiteral\';");
+    _builder.newLine();
+    _builder.append("import { UniDoWhile } from \'../../node/UniDoWhile\';\t");
+    _builder.newLine();
+    _builder.append("import { UniEmptyStatement } from \'../../node/UniEmptyStatement\';");
+    _builder.newLine();
+    _builder.append("import { UniFunctionDec } from \'../../node/UniFunctionDec\';");
+    _builder.newLine();
+    _builder.append("import { UniFor } from \'../../node/UniFor\';");
+    _builder.newLine();
+    _builder.append("import { UniIdent } from \'../../node/UniIdent\';");
+    _builder.newLine();
+    _builder.append("import { UniIf } from \'../../node/UniIf\';");
+    _builder.newLine();
+    _builder.append("import { UniIntLiteral } from \'../../node/UniIntLiteral\';\t\t");
+    _builder.newLine();
+    _builder.append("import { UniMethodCall } from \'../../node/UniMethodCall\';");
+    _builder.newLine();
+    _builder.append("import { UniNew } from \'../../node/UniNew\';");
+    _builder.newLine();
+    _builder.append("import { UniNewArray } from \'../../node/UniNewArray\';");
+    _builder.newLine();
+    _builder.append("import { UniWhile } from \'../../node/UniWhile\';");
+    _builder.newLine();
+    _builder.append("import { UniUnaryOp } from \'../../node/UniUnaryOp\';");
+    _builder.newLine();
+    _builder.append("import { UniTernaryOp } from \'../../node/UniTernaryOp\';");
+    _builder.newLine();
+    _builder.append("import { UniStatement } from \'../../node/UniStatement\';");
+    _builder.newLine();
+    _builder.append("import { UniStringLiteral } from \'../../node/UniStringLiteral\';");
+    _builder.newLine();
+    _builder.append("import { UniReturn } from \'../../node/UniReturn\';");
+    _builder.newLine();
+    _builder.append("import { UniVariableDec } from \'../../node/UniVariableDec\';");
+    _builder.newLine();
+    _builder.append("import { UniVariableDef } from \'../../node/UniVariableDef\';");
+    _builder.newLine();
+    _builder.append("import { UniSwitchUnit } from \'../../node/UniSwitchUnit\';");
+    _builder.newLine();
+    _builder.append("import { UniSwitch } from \'../../node/UniSwitch\';");
+    _builder.newLine();
+    _builder.append("import { UniProgram } from \'../../node/UniProgram\';");
+    _builder.newLine();
     return _builder;
   }
   
@@ -174,7 +220,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("// tslint:disable");
     _builder.newLine();
-    CharSequence _generateImports = this.generateImports();
+    CharSequence _generateImports = this.generateImports(g);
     _builder.append(_generateImports);
     _builder.newLineIfNotEmpty();
     _builder.newLine();
@@ -189,11 +235,11 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("}");
     _builder.newLine();
     _builder.newLine();
-    _builder.append("export default class ");
+    _builder.append("export class ");
     _builder.append(this._grammarName);
-    _builder.append("Mapper extends ");
+    _builder.append("Mapper implements ");
     _builder.append(this._grammarName);
-    _builder.append("Visitor {");
+    _builder.append("Visitor<any> {");
     _builder.newLineIfNotEmpty();
     _builder.newLine();
     _builder.append("\t");
@@ -205,7 +251,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("Parser;");
     _builder.newLineIfNotEmpty();
     _builder.append("\t");
-    _builder.append("private _comments:Comment[] = [];");
+    _builder.append("private\t_comments:Comment[] = [];");
     _builder.newLine();
     _builder.append("\t");
     _builder.append("private _lastNode:UniNode;");
@@ -232,7 +278,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("getRawTree(code) {");
     _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("const chars = new InputStream(code);");
+    _builder.append("const chars = new ANTLRInputStream(code);");
     _builder.newLine();
     _builder.append("\t\t");
     _builder.append("const lexer = new ");
@@ -247,9 +293,6 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append(this._grammarName, "\t\t");
     _builder.append("Parser(tokens);");
     _builder.newLineIfNotEmpty();
-    _builder.append("\t\t");
-    _builder.append("this.parser.buildParseTrees = true;");
-    _builder.newLine();
     _builder.append("\t\t");
     _builder.append("const tree = this.parser.translationunit();");
     _builder.newLine();
@@ -261,10 +304,10 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.newLine();
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("parse(code) {");
+    _builder.append("parse(code:string) {");
     _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("return this.parseCore(new InputStream(code));");
+    _builder.append("return this.parseCore(new ANTLRInputStream(code));");
     _builder.newLine();
     _builder.append("\t");
     _builder.append("}");
@@ -273,7 +316,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("\t");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("parseCore(chars) {");
+    _builder.append("parseCore(chars:ANTLRInputStream) {");
     _builder.newLine();
     _builder.append("\t\t");
     _builder.append("const lexer = new ");
@@ -288,9 +331,6 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append(this._grammarName, "\t\t");
     _builder.append("Parser(tokens);");
     _builder.newLineIfNotEmpty();
-    _builder.append("\t\t");
-    _builder.append("this.parser.buildParseTrees = true;");
-    _builder.newLine();
     _builder.append("\t\t");
     _builder.append("const tree = this.parser.");
     String _name = g.getRoot().getRoot().getName();
@@ -327,7 +367,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
         _builder.newLine();
         _builder.append("\t\t");
         _builder.append("\t");
-        _builder.append("const count = this._stream.tokens.length - 1");
+        _builder.append("const count = this._stream.getTokens().length - 1");
         _builder.newLine();
         _builder.append("\t\t");
         _builder.append("\t");
@@ -335,7 +375,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
         _builder.newLine();
         _builder.append("\t\t");
         _builder.append("\t\t");
-        _builder.append("const hiddenToken = this._stream.tokens[i]; // Includes skipped tokens (maybe)");
+        _builder.append("const hiddenToken = this._stream.getTokens()[i]; // Includes skipped tokens (maybe)");
         _builder.newLine();
         _builder.append("\t\t");
         _builder.append("\t\t");
@@ -351,7 +391,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
         _builder.newLine();
         _builder.append("\t\t");
         _builder.append("\t\t");
-        _builder.append("this._lastNode.comments += hiddenToken.text");
+        _builder.append("this._lastNode.comments.push(hiddenToken.text);");
         _builder.newLine();
         _builder.append("\t\t");
         _builder.append("\t");
@@ -427,7 +467,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("public visitChildren(node:RuleNode) {");
     _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("const n = node.getChildCount();");
+    _builder.append("const n = node.childCount;");
     _builder.newLine();
     _builder.append("\t\t");
     _builder.append("const list:any[] = [];");
@@ -507,22 +547,22 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("if (node instanceof UniNode) {");
     _builder.newLine();
     _builder.append("\t\t\t");
-    _builder.append("if(tree instanceof RuleContext) {");
+    _builder.append("if(tree instanceof ParserRuleContext) {");
     _builder.newLine();
     _builder.append("\t\t\t\t");
     _builder.append("const start = tree.start;");
     _builder.newLine();
     _builder.append("\t\t\t\t");
-    _builder.append("const begin = new CodeLocation(start.column,start.line);");
+    _builder.append("const begin = new CodeLocation(start.charPositionInLine,start.line);");
     _builder.newLine();
     _builder.append("\t\t\t\t");
     _builder.append("const stop = tree.stop;");
     _builder.newLine();
     _builder.append("\t\t\t\t");
-    _builder.append("const endPos = stop.column;");
+    _builder.append("const endPos = stop.charPositionInLine;");
     _builder.newLine();
     _builder.append("\t\t\t\t");
-    _builder.append("const length = 1 + stop.stop - stop.start;");
+    _builder.append("const length = 1 + stop.stopIndex - stop.startIndex;");
     _builder.newLine();
     _builder.append("\t\t\t\t");
     _builder.append("const end = new CodeLocation(endPos + length, stop.line);");
@@ -613,7 +653,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("if (node instanceof ParserRuleContext) {");
     _builder.newLine();
     _builder.append("\t\t\t");
-    _builder.append("const n = node.getChildCount();");
+    _builder.append("const n = node.childCount;");
     _builder.newLine();
     _builder.append("\t\t\t");
     _builder.append("if (n > 1) {");
@@ -641,6 +681,17 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.newLine();
     _builder.append("\t");
     _builder.append("}");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("visitErrorNode(node: ErrorNode): UniNode{");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("return null;");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("}\t\t\t");
     _builder.newLine();
     _builder.append("\t");
     _builder.newLine();
@@ -686,10 +737,10 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("for (; i < count; i++) {");
     _builder.newLine();
     _builder.append("\t\t\t\t");
-    _builder.append("const hiddenToken = this._stream.tokens[i]; // Includes skipped tokens (maybe)");
+    _builder.append("const hiddenToken = this._stream.getTokens()[i]; // Includes skipped tokens (maybe)");
     _builder.newLine();
     _builder.append("\t\t\t\t");
-    _builder.append("if (this._lastNode !== null && this._stream.tokens[this._nextTokenIndex - 1].line == hiddenToken.line) {");
+    _builder.append("if (this._lastNode !== null && this._stream.getTokens()[this._nextTokenIndex - 1].line == hiddenToken.line) {");
     _builder.newLine();
     _builder.append("\t\t\t\t\t");
     _builder.append("if (this._lastNode.comments === null) {");
@@ -701,7 +752,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("}");
     _builder.newLine();
     _builder.append("\t\t\t\t\t");
-    _builder.append("this._lastNode.comments += hiddenToken.text;");
+    _builder.append("this._lastNode.comments.push(hiddenToken.text);");
     _builder.newLine();
     _builder.append("\t\t\t\t");
     _builder.append("} else {");
@@ -716,16 +767,16 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("}");
     _builder.newLine();
     _builder.append("\t\t\t");
-    _builder.append("const count2 = this._stream.tokens.length - 1;");
+    _builder.append("const count2 = this._stream.getTokens().length - 1;");
     _builder.newLine();
     _builder.append("\t\t\t");
-    _builder.append("for (i = count + 1; i < count2 && this._stream.tokens[i].channel == Token.HIDDEN_CHANNEL &&");
+    _builder.append("for (i = count + 1; i < count2 && this._stream.getTokens()[i].channel == Token.HIDDEN_CHANNEL &&");
     _builder.newLine();
     _builder.append("\t\t\t\t");
-    _builder.append("this._stream.tokens[count].line == this._stream.tokens[i].line; i++) {");
+    _builder.append("this._stream.getTokens()[count].line == this._stream.getTokens()[i].line; i++) {");
     _builder.newLine();
     _builder.append("\t\t\t\t");
-    _builder.append("contents.push(this._stream.tokens[i].text);");
+    _builder.append("contents.push(this._stream.getTokens()[i].text);");
     _builder.newLine();
     _builder.append("\t\t\t");
     _builder.append("}");
@@ -1222,8 +1273,6 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
       _builder.append("public visit");
       _builder.append(ruleName);
       _builder.append("(ctx:");
-      _builder.append(this._grammarName);
-      _builder.append("Parser.");
       _builder.append(ruleName);
       _builder.append("Context) {");
       _builder.newLineIfNotEmpty();
@@ -1339,7 +1388,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
           _builder.newLine();
         }
       }
-      _builder.append("const n = ctx.getChildCount();");
+      _builder.append("const n = ctx.childCount;");
       _builder.newLine();
       _builder.append("for (let i = 0; i < n;++i) {");
       _builder.newLine();
@@ -1537,13 +1586,13 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
             String _name = r.getType().getType().getName();
             boolean _tripleNotEquals_1 = (_name != null);
             if (_tripleNotEquals_1) {
-              _builder.append("let node = this.castTo(map, ");
-              String _name_1 = r.getType().getType().getName();
-              _builder.append(_name_1);
-              _builder.append(");");
-              _builder.newLineIfNotEmpty();
               {
                 if (hasMerge) {
+                  _builder.append("let node = this.castTo(map, ");
+                  String _name_1 = r.getType().getType().getName();
+                  _builder.append(_name_1);
+                  _builder.append(");");
+                  _builder.newLineIfNotEmpty();
                   _builder.append("if(typeof node === \'object\' && \'merge\' in node){");
                   _builder.newLine();
                   _builder.append("\t");
@@ -1568,6 +1617,12 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
                   _builder.newLineIfNotEmpty();
                   _builder.append("}");
                   _builder.newLine();
+                } else {
+                  _builder.append("const node = this.castTo(map, ");
+                  String _name_5 = r.getType().getType().getName();
+                  _builder.append(_name_5);
+                  _builder.append(");");
+                  _builder.newLineIfNotEmpty();
                 }
               }
               _builder.append("return node;");
@@ -1823,7 +1878,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
           _builder.newLine();
         }
       }
-      _builder.append("const n = ctx.getChildCount();");
+      _builder.append("const n = ctx.childCount;");
       _builder.newLine();
       _builder.append("if (0<n) {");
       _builder.newLine();
@@ -2115,7 +2170,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.newLine();
     _builder.append("map.set(\"none\", none);");
     _builder.newLine();
-    _builder.append("const n = node.getChildCount();");
+    _builder.append("const n = node.childCount;");
     _builder.newLine();
     _builder.append("for (let i = 0; i < n;++i) {");
     _builder.newLine();
@@ -2140,8 +2195,6 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("public ");
     _builder.append(methodName);
     _builder.append("(ctx:");
-    _builder.append(this._grammarName);
-    _builder.append("Parser.");
     String _camelCase_1 = this.toCamelCase(r.getName());
     _builder.append(_camelCase_1);
     _builder.append("Context) {");
@@ -2150,7 +2203,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("const findFirst = (ctx) => {");
     _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("const n = ctx.getChildCount();");
+    _builder.append("const n = ctx.childCount;");
     _builder.newLine();
     _builder.append("\t\t");
     _builder.append("for (let i = 0; i < n;++i) {");
@@ -2159,7 +2212,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("const it = ctx.getChild(i);\t");
     _builder.newLine();
     _builder.append("\t\t\t");
-    _builder.append("if (it instanceof TerminalNodeImpl) {");
+    _builder.append("if (it instanceof TerminalNode) {");
     _builder.newLine();
     {
       List<Element> _list = IteratorExtensions.<Element>toList(Iterators.<Element>filter(r.eAllContents(), Element.class));

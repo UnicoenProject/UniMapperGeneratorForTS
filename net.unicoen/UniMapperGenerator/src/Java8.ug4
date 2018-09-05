@@ -51,6 +51,7 @@
 /Users/parrt/antlr/code/grammars-v4/java8/./Test.java
 Total lexer+parser time 30844ms.
  */
+
 grammar Java8;
 root translationunit;
 
@@ -837,7 +838,7 @@ labeledStatementNoShortIf
 	:	Identifier ':' statementNoShortIf
 	;
 
-expressionStatement => UniBinOp  //後で消すーアブストラクトではないインスタンスを作る為に書くだけ
+expressionStatement => UniBinOp  //後で消すーアブストラクトではな�?インスタンスを作る為に書くだ�?
 	:	statementExpression$RETURN ';'
 	;
 
