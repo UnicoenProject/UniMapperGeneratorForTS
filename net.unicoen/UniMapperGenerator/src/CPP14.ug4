@@ -700,7 +700,7 @@ typespecifier
 	| enumspecifier
 ;
 
-trailingtypespecifier=>String
+trailingtypespecifier
 :
 	simpletypespecifier
 	| elaboratedtypespecifier
@@ -720,7 +720,7 @@ trailingtypespecifierseq
 	| trailingtypespecifier trailingtypespecifierseq
 ;
 
-simpletypespecifier
+simpletypespecifier =>String
 :
 	nestednamespecifier? typename
 	| nestednamespecifier Template simpletemplateid
@@ -758,7 +758,7 @@ decltypespecifier
 
 elaboratedtypespecifier
 :
-	classkey attributespecifierseq? nestednamespecifier? Identifier
+	classkey attributespecifierseq? nestednamespecifier? Identifier$RETURN
 	| classkey simpletemplateid
 	| classkey nestednamespecifier Template? simpletemplateid
 	| Enum nestednamespecifier? Identifier
@@ -1212,28 +1212,28 @@ memberdeclaration
 	| emptydeclaration
 ;
 
-membervariabledeclarationstatement => List<UniVariableDec>
+membervariabledeclarationstatement => UniVariableDec
 :
 	membervariabledeclaration$RETURN ';'
 	
 ;
 
-membervariabledeclaration => List<UniVariableDec>
+membervariabledeclaration => UniVariableDec
 :
 	attributespecifierseq? declspecifierseqwithouttype?$modifiers 
-		typespecifier$type ptroperator*$type memberdeclaratorlist?$MERGE
+		typespecifier$type ptroperator*$type memberdeclaratorlist?$variables
 ;
 
-memberdeclaratorlist
+memberdeclaratorlist => List<UniVariableDef>
 :
 	memberdeclarator$ADD
 	//arrayDeclarator$ADD
 	| memberdeclaratorlist$ADD ',' memberdeclarator$ADD
 ;
 
-memberdeclarator
+memberdeclarator => UniVariableDef
 :
-	declaratorid$name virtspecifierseq?$modifiers purespecifier?
+	declaratorid$name virtspecifierseq?$typeSuffix purespecifier?
 	| declaratorid$name ('=' initializerclause$value)?
 	| declaratorid$name bracedinitlist?$value
 	| Identifier?$name attributespecifierseq? ':' constantexpression$value
