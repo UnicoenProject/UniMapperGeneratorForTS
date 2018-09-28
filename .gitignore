@@ -51,3 +51,5 @@ local.properties
 .worksheet
 /.metadata/
 net.unicoen/UniMapperGenerator/src-gen/
+net.unicoen/node_modules/
+net.unicoen/package-lock.json

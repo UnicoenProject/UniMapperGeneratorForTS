@@ -68,6 +68,7 @@ import org.eclipse.core.runtime.Path
 import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.generator.IFileSystemAccessExtension2
 import java.io.FileNotFoundException
+import java.util.Map
 
 //import org.eclipse.core.resources.ResourcesPlugin
 
@@ -78,7 +79,7 @@ class ANTLRGrammarGenerator {
 	private val _fileExtension = ".g4";
 	
 	//以下はユーザーが必要に応じて設定する変数
-	private val _targetExt = ".js"//".java"
+	private val _targetExt = ".ts"//".java"
 	//以下はnet.unicoenディレクトリ内に配置
 	private val editorProjectName = "UniMapperGenerator"
 	//さらに以下はパッケージエクスプローラー上に表示されていること。
@@ -130,20 +131,43 @@ class ANTLRGrammarGenerator {
 		reader.close
 		builder.toString
 	}
+	
+	def isWindows() {
+		System.getProperty("os.name").toLowerCase().contains("win");
+	}
 
 	def generateParserCode(String basename, String filename) {
 		val projectDirPath = getProjectDirPath()
-		val antlrPath = getAntlr4AbsPath(projectDirPath)		
 		val editorProjectDirPath = projectDirPath + editorProjectName + _fileSep
 		val editorProjectSrcGenDirPath = editorProjectDirPath + "src-gen" + _fileSep
 		val g4FilePath = editorProjectSrcGenDirPath + filename// パッケージエクスプローラー上のANTLRGrammarGeneratorと同じ
 		
-		val pb = new ProcessBuilder("java", "-cp", antlrPath, "org.antlr.v4.Tool", 
-		"-visitor", 
-		"-no-listener", 
-		"-Dlanguage=JavaScript", 
-		"-o", editorProjectSrcGenDirPath, g4FilePath)
-		pb.start.waitFor
+		{
+			val npm = if(isWindows()) "npm.cmd" else "npm";
+			val pb = new ProcessBuilder(npm, "install", "antlr4ts-cli")
+			pb.directory(new File(projectDirPath))
+			try {
+				pb.start.waitFor
+			} catch(java.io.IOException e) {
+				System.out.println("npm command cannot be executed!");
+				System.out.println("Please install node.js and npm.");
+			}
+		}
+		{
+			val npx = if(isWindows()) "npx.cmd" else "npx";
+			val pb = new ProcessBuilder(npx, "antlr4ts", 
+				"-visitor", 
+				"-no-listener", 
+				g4FilePath,
+				"-o", editorProjectSrcGenDirPath)
+			pb.directory(new File(projectDirPath))
+			try {
+				pb.start.waitFor
+			} catch(Exception e) {
+				System.out.println("\"npx antlr4ts\" command cannot be executed!");
+			}
+		}
+		
 		readParserFile(editorProjectSrcGenDirPath, basename)
 	}
 

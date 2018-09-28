@@ -21,15 +21,16 @@ class InvokingStateAnalyzer {
 				return
 			}
 			val ruleName = rule.name
-			var pos = code.indexOf('''Parser.prototype.«ruleName» = function(''')
+			var pos = code.indexOf('''public «ruleName»(''')
 			val list = Lists.newArrayList
 			val trypos = code.indexOf("try", pos)
 			val hasLeftRecursion = code.substring(pos, trypos).contains("enterRecursionRule")
 			var recursionState = -1;
 			if (hasLeftRecursion) {
-				val start = code.indexOf("var _startState = ", pos)
+				val searchStr = "let _startState: number = ";
+				val start = code.indexOf(searchStr, pos)
 				val last = code.indexOf(";", start)
-				val str = code.substring(start + 18, last)
+				val str = code.substring(start + searchStr.length, last)
 				recursionState = Integer.parseInt(str)
 			}
 			for (element : rule.eAllContents.filter(Element).filter[it.op != null].toList) {
@@ -42,9 +43,10 @@ class InvokingStateAnalyzer {
 						} else {
 							val refName = ref.reference.name
 							pos = code.indexOf('''«refName»(''', pos)
-							val start = code.lastIndexOf("this.state = ", pos)
+							val searchStr = "this.state = ";
+							val start = code.lastIndexOf(searchStr, pos)
 							val last = code.indexOf(';', start)
-							val str = code.substring(start + 13, last)
+							val str = code.substring(start + searchStr.length, last)
 							val state = Integer.parseInt(str)
 							list.add(state)
 							pos++
