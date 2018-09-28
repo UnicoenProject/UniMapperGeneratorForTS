@@ -5,6 +5,7 @@ import com.google.common.io.Files;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -92,11 +93,9 @@ public class ANTLRGrammarGenerator {
   
   private final String _fileExtension = ".g4";
   
-  private final String _targetExt = ".js";
+  private final String _targetExt = ".ts";
   
   private final String editorProjectName = "UniMapperGenerator";
-  
-  private final String antlrJarFileName = "antlr-4.7.1-complete.jar";
   
   public ANTLRGrammarGenerator(final IFileSystemAccess fsa) {
     this._fsa = fsa;
@@ -134,25 +133,6 @@ public class ANTLRGrammarGenerator {
     }
   }
   
-  public String getAntlr4AbsPath(final String projectDirPath) {
-    try {
-      String _xblockexpression = null;
-      {
-        final String antlr4FilePath = (projectDirPath + this.antlrJarFileName);
-        final File antlr4File = new File(antlr4FilePath);
-        boolean _exists = antlr4File.exists();
-        boolean _not = (!_exists);
-        if (_not) {
-          throw new FileNotFoundException((antlr4FilePath + " is not found."));
-        }
-        _xblockexpression = antlr4File.getAbsolutePath();
-      }
-      return _xblockexpression;
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
-  }
-  
   public String readParserFile(final String srcGenDirPath, final String basename) {
     try {
       String _xblockexpression = null;
@@ -177,21 +157,70 @@ public class ANTLRGrammarGenerator {
     }
   }
   
+  public boolean isWindows() {
+    return System.getProperty("os.name").toLowerCase().contains("win");
+  }
+  
   public String generateParserCode(final String basename, final String filename) {
     try {
       String _xblockexpression = null;
       {
-        final String projectDirPath = this.getProjectDirPath();
-        final String antlrPath = this.getAntlr4AbsPath(projectDirPath);
+        String _projectDirPath = this.getProjectDirPath();
+        String _plus = (_projectDirPath + "..");
+        final String projectDirPath = (_plus + this._fileSep);
         final String editorProjectDirPath = ((projectDirPath + this.editorProjectName) + this._fileSep);
         final String editorProjectSrcGenDirPath = ((editorProjectDirPath + "src-gen") + this._fileSep);
         final String g4FilePath = (editorProjectSrcGenDirPath + filename);
-        final ProcessBuilder pb = new ProcessBuilder("java", "-cp", antlrPath, "org.antlr.v4.Tool", 
-          "-visitor", 
-          "-no-listener", 
-          "-Dlanguage=JavaScript", 
-          "-o", editorProjectSrcGenDirPath, g4FilePath);
-        pb.start().waitFor();
+        {
+          String _xifexpression = null;
+          boolean _isWindows = this.isWindows();
+          if (_isWindows) {
+            _xifexpression = "npm.cmd";
+          } else {
+            _xifexpression = "npm";
+          }
+          final String npm = _xifexpression;
+          final ProcessBuilder pb = new ProcessBuilder(npm, "install", "antlr4ts-cli");
+          File _file = new File(projectDirPath);
+          pb.directory(_file);
+          try {
+            pb.start().waitFor();
+          } catch (final Throwable _t) {
+            if (_t instanceof IOException) {
+              final IOException e = (IOException)_t;
+              System.out.println("npm command cannot be executed!");
+              System.out.println("Please install node.js and npm.");
+            } else {
+              throw Exceptions.sneakyThrow(_t);
+            }
+          }
+        }
+        {
+          String _xifexpression = null;
+          boolean _isWindows = this.isWindows();
+          if (_isWindows) {
+            _xifexpression = "npx.cmd";
+          } else {
+            _xifexpression = "npx";
+          }
+          final String npx = _xifexpression;
+          final ProcessBuilder pb = new ProcessBuilder(npx, "antlr4ts", 
+            "-visitor", 
+            "-no-listener", g4FilePath, 
+            "-o", editorProjectSrcGenDirPath);
+          File _file = new File(projectDirPath);
+          pb.directory(_file);
+          try {
+            pb.start().waitFor();
+          } catch (final Throwable _t) {
+            if (_t instanceof Exception) {
+              final Exception e = (Exception)_t;
+              System.out.println("\"npx antlr4ts\" command cannot be executed!");
+            } else {
+              throw Exceptions.sneakyThrow(_t);
+            }
+          }
+        }
         _xblockexpression = this.readParserFile(editorProjectSrcGenDirPath, basename);
       }
       return _xblockexpression;

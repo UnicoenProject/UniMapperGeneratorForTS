@@ -53,3 +53,7 @@ local.properties
 net.unicoen/UniMapperGenerator/src-gen/
 net.unicoen/node_modules/
 net.unicoen/package-lock.json
+net.unicoen/.metadata/
+package-lock.json
+node_modules/
+UniMapperGenerator/src-gen/

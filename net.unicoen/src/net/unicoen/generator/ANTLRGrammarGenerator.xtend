@@ -82,8 +82,6 @@ class ANTLRGrammarGenerator {
 	private val _targetExt = ".ts"//".java"
 	//以下はnet.unicoenディレクトリ内に配置
 	private val editorProjectName = "UniMapperGenerator"
-	//さらに以下はパッケージエクスプローラー上に表示されていること。
-	private val antlrJarFileName = "antlr-4.7.1-complete.jar"
 	
 	new(IFileSystemAccess fsa) {
 		_fsa = fsa
@@ -107,16 +105,6 @@ class ANTLRGrammarGenerator {
 		file.getAbsolutePath() + _fileSep
 	}
 	
-	// "/C:/~/~/(workspace-name)/net.unicoen/(antlrJarFileName)"の存在チェックと絶対パス取得
-	def getAntlr4AbsPath(String projectDirPath) {
-		val antlr4FilePath = projectDirPath + antlrJarFileName
-		val antlr4File = new File(antlr4FilePath)
-		if(!antlr4File.exists()){
-			throw new FileNotFoundException(antlr4FilePath + " is not found.")
-		}
-		antlr4File.absolutePath
-	}
-	
 	// (Lang)Parse.(_targetExt)の読み込み
 	def readParserFile(String srcGenDirPath, String basename){
 		val parserFilePath = srcGenDirPath + basename + "Parser" + _targetExt
@@ -137,7 +125,7 @@ class ANTLRGrammarGenerator {
 	}
 
 	def generateParserCode(String basename, String filename) {
-		val projectDirPath = getProjectDirPath()
+		val projectDirPath = getProjectDirPath() + ".." + _fileSep
 		val editorProjectDirPath = projectDirPath + editorProjectName + _fileSep
 		val editorProjectSrcGenDirPath = editorProjectDirPath + "src-gen" + _fileSep
 		val g4FilePath = editorProjectSrcGenDirPath + filename// パッケージエクスプローラー上のANTLRGrammarGeneratorと同じ
