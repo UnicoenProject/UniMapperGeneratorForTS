@@ -89,3 +89,5 @@ site/content.jar
 net.unicoen/UniMapperGenerator/src-gen/
 net.unicoen/node_modules/
 net.unicoen/package-lock.json
+net.unicoen/.metadata/
+RemoteSystemsTempFiles
