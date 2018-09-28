@@ -556,6 +556,7 @@ myclasshead=>UniClassDec
 declaration
 :
 	variabledeclarationstatement
+	| functiondeclarationstatement
 	| blockdeclaration
 	| myclassspecifier//additionally
 	| functiondefinition
@@ -620,7 +621,13 @@ dims => String
 :	
 	LeftBracket RightBracket
 ;
-	
+
+//Additionally
+functiondeclarationstatement => UniFunctionDec
+:
+	attributespecifierseq? declspecifierseqwithouttype?$modifiers
+		functionheader$MERGE virtspecifierseq? ';'
+;
 simpledeclaration
 :
 	declspecifierseq? initdeclaratorlist? ';'
@@ -1107,7 +1114,7 @@ functiondefinition => UniFunctionDec
 /*Additionaly*/
 functionheader => UniFunctionDec
 :
-	typespecifier?$returnType functiondeclarator$MERGE
+	typespecifier?$returnType ptroperator*$returnType functiondeclarator$MERGE
 ;
 
 /*Additionaly*/
