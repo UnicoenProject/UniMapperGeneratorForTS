@@ -50,6 +50,42 @@ local.properties
 .scala_dependencies
 .worksheet
 /.metadata/
+
+
+# from antlr4ide
+*.class
+
+# Package Files #
+*.war
+*.ear
+
+target
+bin
+dependency-reduced-pom.xml
+
+# OSX
+*.DS_Store
+
+# IntelliJ IDE Project Files #
+*.iml
+*.idea
+
+lib
+.antlr-generator-3.2.0-patch.jar
+generated
+src-gen
+xtend-gen
+plugin.xml_gen
+model
+
+site/features
+site/plugins
+site/artifacts.jar
+site/content.jar
+/.settings/
+
+
+# Added by users
 net.unicoen/UniMapperGenerator/src-gen/
 net.unicoen/node_modules/
 net.unicoen/package-lock.json
