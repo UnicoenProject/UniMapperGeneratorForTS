@@ -50,6 +50,7 @@ If you are concerned about the errors, please create the empty folders in net.un
 4. Then, (language).g4, (language)Parser.ts, (language)Lexer.ts, (language)Visitor.ts, and (language)Mapper.ts are generated!
    + It may take some time to install the library only for the first time.
    + If "Building workspace" progress stops at 45% or generates a invalid g4 file, Please check the setting of 2-1 character code.
+   + If you installed node.js for the first time, the environment path may not be reflected yet. Please try to reboot your PC.
 
 Related Works
 ---
