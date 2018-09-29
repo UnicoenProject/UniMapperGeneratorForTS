@@ -22,6 +22,8 @@ How to Develop
   1. Restart eclipse & wait for workspace building
 
 ### 2. Import UniMapperGenerator
+0. Change workspace text file encoding to UTF-8 from MS932 (Eclipse Default)
+    + "Window" -> "Preferences" -> "General" -> "Workspace" -> "Text file encoding"
 1. Clone [UniMapperGeneratorForTS](https://github.com/UnicoenProject/UniMapperGeneratorForTS).
 2. Choose "File" -> "Import" in the menu
 3. Choose "General" -> "Existing Projects into Workspace" in the window
@@ -46,6 +48,8 @@ If you are concerned about the errors, please create the empty folders in net.un
 2. Import "UniMapperGenerator" in the root directory
 3. Edit the (language).ug4 files in src/
 4. Then, (language).g4, (language)Parser.ts, (language)Lexer.ts, (language)Visitor.ts, and (language)Mapper.ts are generated!
+   + It may take some time to install the library only for the first time.
+   + If "Building workspace" progress stops at 45% or generates a invalid g4 file, Please check the setting of 2-1 character code.
 
 Related Works
 ---
