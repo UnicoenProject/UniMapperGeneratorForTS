@@ -5,13 +5,14 @@ Requirements
 
 * [Eclipse](https://eclipse.org/) (Tested with 4.7.3 Oxygen) 
 * [Xtext & Xtend](http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/) (Tested with 2.15.0) 
+  * There is a [Eclipse IDE for Java and DSL Developers](https://www.eclipse.org/downloads/packages/release/oxygen/3a/eclipse-ide-java-and-dsl-developers) including Xtext & Xtend
 * [Node.js 8.2.0+](https://nodejs.org/ja/)
   * npm(5.2.0+)
 
 How to Develop
 ---
 
-### 1. Install Xtext & Xtend
+### 1. Install Xtext & Xtend to Eclipse
 * Visit [download page](http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/) in Xtext web site
 * Follow the [Installation Instructions]
   1. right click **[Release]** button & copy the link 
