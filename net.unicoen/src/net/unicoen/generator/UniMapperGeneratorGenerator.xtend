@@ -307,24 +307,24 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 			private flatten(obj:any) {
 				if (Array.isArray(obj)) {
 					if (obj.length === 1) {
-					return this.flatten(obj[0]);
+						return this.flatten(obj[0]);
 					}
 					const ret = [];
 					obj.forEach((it:any) => {
-					ret.push(this.flatten(it));
+						ret.push(this.flatten(it));
 					});
 					return ret;
 				}
 			
 				if (obj instanceof Map) {
 					if (obj.size === 1) {
-					for (const value of obj.values()) {
-						return this.flatten(value);
-					}
+						for (const value of obj.values()) {
+							return this.flatten(value);
+						}
 					}
 					const ret = new Map<any, any>();
 					obj.forEach((value: any, key: any) => {
-					ret.set(key, this.flatten(value));
+						ret.set(key, this.flatten(value));
 					});
 					return ret;
 				}
@@ -336,37 +336,37 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 				const temp = this.flatten(obj);
 				const ret = [];
 				if (temp instanceof Map) {
-				const add = temp.has('add');
-				temp.forEach((value: any, key: any) => {
-					switch (key) {
-					case 'add': {
-						if (value instanceof Map) {
-						ret.push(this.castTo<T>(value, clazz));
-						} else if (Array.isArray(value)) {
-						value.forEach((it:any) => {
-							const t = this.castTo(it, clazz);
-							if (t != null) {
-							ret.push(t);
+					const add = temp.has('add');
+					temp.forEach((value: any, key: any) => {
+						switch (key) {
+						case 'add': {
+							if (value instanceof Map) {
+								ret.push(this.castTo<T>(value, clazz));
+							} else if (Array.isArray(value)) {
+								value.forEach((it:any) => {
+									const t = this.castTo(it, clazz);
+									if (t != null) {
+										ret.push(t);
+									}
+								});
+							} else {
+								ret.push(this.castToList(value, clazz));
 							}
-						});
-						} else {
-						ret.push(this.castToList(value, clazz));
-						}
-					} 
-						break;
-					default:
-						if (!add) {
-						ret.push(this.castToList(value, clazz));
-						}
-						break;
-					}	
-				});
+						} 
+							break;
+						default:
+							if (!add) {
+								ret.push(this.castToList(value, clazz));
+							}
+							break;
+						}	
+					});
 				} else if (Array.isArray(temp)) {
-				temp.forEach((it:any) => {
-					ret.push(this.castToList(it, clazz));
-				});
+					temp.forEach((it:any) => {
+						ret.push(this.castToList(it, clazz));
+					});
 				} else {
-				ret.push(this.castTo(temp, clazz));
+					ret.push(this.castTo(temp, clazz));
 				}
 				return ret;
 			}
@@ -376,71 +376,71 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 				const fields = instance.fields;
 				const fieldsName = [];
 				for (let it in instance) {
-				fieldsName.push(it);
+					fieldsName.push(it);
 				}
 				if (temp instanceof Map) {
-				if (clazz === String) {
-					let builder = '';
-					const hasAdd = temp.has('add');
+					if (clazz === String) {
+						let builder = '';
+						const hasAdd = temp.has('add');
+						temp.forEach((value: any, key: any) => {
+						switch (key) {
+							case 'add': {
+								builder += this.castTo<T>(value, clazz);
+							}
+							break;
+							default: {
+								if (!hasAdd) {
+									builder += this.castTo<T>(value, clazz);
+								}
+							}
+							break;
+						}
+						});
+						return (builder.length > 0) ? builder : null;
+					}
 					temp.forEach((value: any, key: any) => {
-					switch (key) {
-						case 'add': {
-						builder += this.castTo<T>(value, clazz);
+						if (fieldsName.includes(key)) {
+							const field:Function = fields.get(key);
+							if (Array.isArray(instance[key])) {
+								const list	= this.flatten(this.castToList(value, field));
+								if(!Array.isArray(list)) {
+									instance[key] = [list];
+								} else {
+									instance[key] = list;
+								}
+							} else if (value.length == 0
+								&& (field == UniExpr || field == UniStatement )){
+								instance[key] = null;
+							} else {
+								instance[key] = this.castTo(value, field);
+							}
 						}
-						break;
-						default: {
-						if (!hasAdd) {
-							builder += this.castTo<T>(value, clazz);
-						}
-						}
-						break;
-					}
 					});
-					return (builder.length > 0) ? builder : null;
-				}
-				temp.forEach((value: any, key: any) => {
-					if (fieldsName.includes(key)) {
-					const field:Function = fields.get(key);
-					if (Array.isArray(instance[key])) {
-					 		const list	= this.flatten(this.castToList(value, field));
-						if(!Array.isArray(list)) {
-						instance[key] = [list];
-						} else {
-						instance[key] = list;
-						}
-					} else if (value.length == 0
-						&& (field == UniExpr || field == UniStatement )){
-						instance[key] = null;
-					} else {
-						instance[key] = this.castTo(value, field);
-					}
-					}
-				});
-				return instance;
+					return instance;
 				}
 				if (Array.isArray(temp)) {
-				if (clazz === String) {
-					let builder = '';
-					temp.forEach((it:any) => {
-					builder += (this.castTo(it, clazz));
-					});
-					return (builder.length > 0) ? builder : null;
-				}
-				const first = temp.find((it) => {
-					return it instanceof clazz;
-				});
-				if (first === null) {
-					try {
-					return instance;
-					} catch (e) {
-					return null;
+					if (clazz === String) {
+						let builder = '';
+						temp.forEach((it:any) => {
+							builder += (this.castTo(it, clazz));
+						});
+						return (builder.length > 0) ? builder : null;
 					}
-				} else {
-					return this.castTo<T>(first,clazz);
-				}
+					const first = temp.find((it) => {
+						return it instanceof clazz;
+					});
+					if (first === null) {
+						try {
+							return instance;
+						} catch (e) {
+							return null;
+						}
+					} else {
+						return this.castTo<T>(first,clazz);
+					}
 				}
 				if(temp != null) {
-				return temp as T;
+					return temp as T;
 				}
 				return instance;
 			}

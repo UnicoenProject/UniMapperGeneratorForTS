@@ -405,7 +405,8 @@ constantexpression
 /*Statements*/
 statement
 :
-	labeledstatement
+	emptydeclaration/*Additionaly*/
+	| labeledstatement
 	| attributespecifierseq? expressionstatement
 	| attributespecifierseq? compoundstatement
 	| attributespecifierseq? selectionstatement
@@ -530,7 +531,7 @@ declarationstatement
 ;
 
 /*Declarations*/
-declarationseq => List<UniStatement>
+declarationseq => List<UniExpr>
 :
 	declaration$ADD
 	| declarationseq$ADD declaration$ADD
@@ -639,9 +640,9 @@ static_assertdeclaration
 	Static_assert '(' constantexpression ',' Stringliteral ')' ';'
 ;
 
-emptydeclaration
+emptydeclaration => UniEmptyStatement
 :
-	';'
+	Semi$endWith
 ;
 
 attributedeclaration
