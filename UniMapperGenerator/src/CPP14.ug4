@@ -405,8 +405,13 @@ constantexpression
 /*Statements*/
 statement
 :
+	labeledstatement
+	|statementWithoutLabeldstatement
+;
+
+statementWithoutLabeldstatement
+:
 	emptydeclaration/*Additionaly*/
-	| labeledstatement
 	| attributespecifierseq? expressionstatement
 	| attributespecifierseq? compoundstatement
 	| attributespecifierseq? selectionstatement
@@ -426,8 +431,18 @@ statement
 labeledstatement
 :
 	attributespecifierseq? Identifier ':' statement
-	| attributespecifierseq? Case constantexpression ':' statement
-	| attributespecifierseq? Default ':' statement
+	| switchunitstatement
+;
+
+switchunitstatement => UniSwitchUnit
+:
+	 attributespecifierseq? (Case$label constantexpression$cond | Default$label) 
+	 ':' statementWithoutLabeldstatementseq$statement
+;
+
+statementWithoutLabeldstatementseq => List<UniExpr>
+:
+	statementWithoutLabeldstatement$ADD statementWithoutLabeldstatement*$ADD
 ;
 
 expressionstatement
@@ -451,9 +466,17 @@ selectionstatement => UniIf
 	| If '(' condition$cond ')' statement$trueStatement Else statement$falseStatement
 ;
 
-switchstatement
+switchstatement => UniSwitch
 :
-	Switch '(' condition ')' statement
+	Switch '(' condition$cond ')' (
+		'{'switchunitseq$cases '}'
+		|statement
+	)
+;
+
+switchunitseq => List<UniStatement>
+:
+	switchunitstatement$ADD switchunitstatement*$ADD
 ;
 
 condition
