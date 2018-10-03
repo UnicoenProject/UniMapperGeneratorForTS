@@ -34,7 +34,7 @@ public class UniMapperGeneratorParsingTest {
       Assert.assertNotNull(result);
       final EList<Resource.Diagnostic> errors = result.eResource().getErrors();
       StringConcatenation _builder_1 = new StringConcatenation();
-      _builder_1.append("Unexpected errors: Å·errors.join(\", \")Å‚");
+      _builder_1.append("Unexpected errors: ÔøΩÔøΩerrors.join(\", \")ÔøΩÔøΩ");
       Assert.assertTrue(_builder_1.toString(), errors.isEmpty());
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);

@@ -1,3 +1,4 @@
+.metadata
 bin/
 tmp/
 *.tmp
@@ -21,7 +22,7 @@ local.properties
 # CDT-specific (C/C++ Development Tooling)
 .cproject
 
-# CDT- autotools 
+# CDT- autotools
 .autotools
 
 # Java annotation processor (APT)
@@ -45,17 +46,13 @@ local.properties
 # Code Recommenders
 .recommenders/
 
+# Annotation Processing
+.apt_generated/
+
 # Scala IDE specific (Scala & Java development for Eclipse)
 .cache-main
 .scala_dependencies
 .worksheet
-/.metadata/
 
-package-lock.json
-node_modules/
-/net.unicoen.ide/xtend-gen
-/net.unicoen.tests/xtend-gen
-/net.unicoen.ui/xtend-gen
-/net.unicoen.ui.tests/xtend-gen
-UniMapperGenerator/src-gen/
-!.gitkeep
+/src-gen
+/xtend-gen
