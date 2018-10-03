@@ -32,17 +32,15 @@ How to Develop
     + net.unicoen.ide
     + net.unicoen.tests
     + net.unicoen.ui
-    + net.unicoen.ui.tests (※)
+    + net.unicoen.ui.tests
 5. Right click the net.unicoen/src/net.unicoen/GeneratorUniMapperGenerator.mwe2 in Package Explorer
-6. Select "Run as" -> "MWE2 Workflow"
+6. Select and exetute "Run as" -> "MWE2 Workflow"  (※)
 
-(※) May be following error messages are displayed, but there is no problem. 
+(※) Even if there are many errors in the projects after the projects import, it is OK to run.
+When the execution of (6) is completed, necessary files are generated and all errors disappear.
 
-* "Project 'net.unicoen.ui.tests' is missing required source folder: 'src'"
-* "Project 'net.unicoen.ui.tests' is missing required source folder: 'xtend-gen'"
+If some errors remain, please check whether you have forgotten (0) to change file encoding.
 
-If you are concerned about the errors, please create the empty folders in net.unicoen.ui.tests.
-      
 ### 3. Execute UniMapperGenerator
 1. Select net.unicoen and "Run as" -> "Eclipse Application (Launch Runtime Eclipse)"
 2. Import "UniMapperGenerator" in the root directory
