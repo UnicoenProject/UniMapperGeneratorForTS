@@ -468,10 +468,10 @@ selectionstatement => UniIf
 
 switchstatement => UniSwitch
 :
-	Switch '(' condition$cond ')' (
-		'{'switchunitseq$cases '}'
-		|statement
-	)
+	Switch '(' condition$cond ')' 
+		('{'switchunitseq$cases '}'
+			//|statement
+		)
 ;
 
 switchunitseq => List<UniStatement>
