@@ -445,9 +445,9 @@ statementWithoutLabeldstatementseq => List<UniExpr>
 	statementWithoutLabeldstatement$ADD statementWithoutLabeldstatement*$ADD
 ;
 
-expressionstatement
+expressionstatement => UniEmptyStatement
 :
-	expression?$RETURN ';'
+	expression?$RETURN Semi$endWith
 ;
 
 compoundstatement => UniBlock

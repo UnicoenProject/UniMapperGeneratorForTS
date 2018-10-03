@@ -2294,7 +2294,7 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
               boolean _equals_5 = Objects.equal(_name_4, "UniCharacterLiteral");
               if (_equals_5) {
                 _builder.append("\t");
-                _builder.append("return new UniCharacterLiteral(text.substring(1, text.length - 1).charAt(0));");
+                _builder.append("return new UniCharacterLiteral(text.substring(1, text.length - 1));");
                 _builder.newLine();
               } else {
                 _builder.append("\t");
