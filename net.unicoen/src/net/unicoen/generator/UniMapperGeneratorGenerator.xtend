@@ -789,7 +789,7 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 			«ELSEIF r.type.type.name == "UniStringLiteral"»
 				return new UniStringLiteral(text.substring(1, text.length - 1));
 			«ELSEIF r.type.type.name == "UniCharacterLiteral"»
-				return new UniCharacterLiteral(text.substring(1, text.length - 1).charAt(0));
+				return new UniCharacterLiteral(text.substring(1, text.length - 1));
 			«ELSE»
 				throw new RuntimeException("Unimplemented Method: «methodName»");
 			«ENDIF»
