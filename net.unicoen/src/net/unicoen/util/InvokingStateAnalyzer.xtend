@@ -42,7 +42,7 @@ class InvokingStateAnalyzer {
 							list.add(recursionState)
 						} else {
 							val refName = ref.reference.name
-							pos = code.indexOf('''«refName»(''', pos)
+							pos = code.indexOf('''this.«refName»(''', pos)
 							val searchStr = "this.state = ";
 							val start = code.lastIndexOf(searchStr, pos)
 							val last = code.indexOf(';', start)
