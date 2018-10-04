@@ -32,7 +32,9 @@ public class InvokingStateAnalyzer {
       }
       final String ruleName = rule.getName();
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("public «ruleName»(");
+      _builder.append("public ");
+      _builder.append(ruleName);
+      _builder.append("(");
       int pos = code.indexOf(_builder.toString());
       final ArrayList<Integer> list = Lists.<Integer>newArrayList();
       final int trypos = code.indexOf("try", pos);
@@ -63,7 +65,9 @@ public class InvokingStateAnalyzer {
               } else {
                 final String refName = ((RuleRef)ref).getReference().getName();
                 StringConcatenation _builder_1 = new StringConcatenation();
-                _builder_1.append("this.«refName»(");
+                _builder_1.append("this.");
+                _builder_1.append(refName);
+                _builder_1.append("(");
                 pos = code.indexOf(_builder_1.toString(), pos);
                 final String searchStr_1 = "this.state = ";
                 final int start_1 = code.lastIndexOf(searchStr_1, pos);

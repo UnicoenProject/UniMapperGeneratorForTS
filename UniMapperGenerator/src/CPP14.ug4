@@ -625,13 +625,18 @@ variabledeclarationstatement => List<UniVariableDec>
 variabledeclaration => UniVariableDec
 :
 	attributespecifierseq? declspecifierseqwithouttype?$modifiers 
-		typespecifier$type variableDeclaratorList?$variables
+		(typespecifier$type variableDeclaratorList?$variables | structspecifier$type variableDeclaratorList$variables)
+;
+
+structspecifier=>UniClassDec
+:
+	Struct classheadname$className  '{' myclassbody$members '}'
 ;
 
 /*Declarators*/
 variableDeclaratorList => List<UniVariableDef>
 :
-	| variableDeclarator$ADD (',' variableDeclarator$ADD)*
+	variableDeclarator$ADD (',' variableDeclarator$ADD)*
 ;
 
 variableDeclarator => UniVariableDef
