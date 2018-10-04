@@ -1,6 +1,5 @@
 package net.unicoen.generator;
 
-import com.google.common.base.Objects;
 import com.google.common.io.Files;
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,7 +28,6 @@ import net.unicoen.uniMapperGenerator.ExceptionHandler;
 import net.unicoen.uniMapperGenerator.FinallyClause;
 import net.unicoen.uniMapperGenerator.Grammar;
 import net.unicoen.uniMapperGenerator.GrammarAction;
-import net.unicoen.uniMapperGenerator.GrammarType;
 import net.unicoen.uniMapperGenerator.Import;
 import net.unicoen.uniMapperGenerator.Imports;
 import net.unicoen.uniMapperGenerator.IntOption;
@@ -42,7 +40,6 @@ import net.unicoen.uniMapperGenerator.LexerAtom;
 import net.unicoen.uniMapperGenerator.LexerBlock;
 import net.unicoen.uniMapperGenerator.LexerCharSet;
 import net.unicoen.uniMapperGenerator.LexerCommand;
-import net.unicoen.uniMapperGenerator.LexerCommandArg;
 import net.unicoen.uniMapperGenerator.LexerCommandExpr;
 import net.unicoen.uniMapperGenerator.LexerCommands;
 import net.unicoen.uniMapperGenerator.LexerElement;
@@ -53,7 +50,6 @@ import net.unicoen.uniMapperGenerator.LocalVars;
 import net.unicoen.uniMapperGenerator.Mode;
 import net.unicoen.uniMapperGenerator.NotSet;
 import net.unicoen.uniMapperGenerator.Option;
-import net.unicoen.uniMapperGenerator.OptionValue;
 import net.unicoen.uniMapperGenerator.Options;
 import net.unicoen.uniMapperGenerator.ParserRule;
 import net.unicoen.uniMapperGenerator.PrequelConstruct;
@@ -64,24 +60,20 @@ import net.unicoen.uniMapperGenerator.Return;
 import net.unicoen.uniMapperGenerator.Rule;
 import net.unicoen.uniMapperGenerator.RuleAction;
 import net.unicoen.uniMapperGenerator.RuleAltList;
-import net.unicoen.uniMapperGenerator.RulePrequel;
 import net.unicoen.uniMapperGenerator.RuleRef;
 import net.unicoen.uniMapperGenerator.SetElement;
 import net.unicoen.uniMapperGenerator.StringOption;
 import net.unicoen.uniMapperGenerator.Terminal;
-import net.unicoen.uniMapperGenerator.TokenRef;
 import net.unicoen.uniMapperGenerator.TokenVocab;
 import net.unicoen.uniMapperGenerator.V3Token;
 import net.unicoen.uniMapperGenerator.V3Tokens;
 import net.unicoen.uniMapperGenerator.V4Token;
 import net.unicoen.uniMapperGenerator.V4Tokens;
 import net.unicoen.uniMapperGenerator.Wildcard;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.generator.IFileSystemAccess;
 import org.eclipse.xtext.xbase.lib.Exceptions;
-import org.eclipse.xtext.xbase.lib.StringExtensions;
 
 @SuppressWarnings("all")
 public class ANTLRGrammarGenerator {
@@ -187,7 +179,6 @@ public class ANTLRGrammarGenerator {
             pb.start().waitFor();
           } catch (final Throwable _t) {
             if (_t instanceof IOException) {
-              final IOException e = (IOException)_t;
               System.out.println("npm command cannot be executed!");
               System.out.println("Please install node.js and npm.");
             } else {
@@ -214,7 +205,6 @@ public class ANTLRGrammarGenerator {
             pb.start().waitFor();
           } catch (final Throwable _t) {
             if (_t instanceof Exception) {
-              final Exception e = (Exception)_t;
               System.out.println("\"npx antlr4ts\" command cannot be executed!");
             } else {
               throw Exceptions.sneakyThrow(_t);
@@ -262,755 +252,327 @@ public class ANTLRGrammarGenerator {
   
   public CharSequence nameCompile(final Grammar g) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      if (((!Objects.equal(g.getType(), null)) && (!g.getType().equals(GrammarType.DEFAULT)))) {
-        GrammarType _type = g.getType();
-        _builder.append(_type);
-        _builder.append(" ");
-      }
-    }
-    _builder.append("grammar ");
-    String _name = g.getName();
-    _builder.append(_name);
-    _builder.append(";");
+    _builder.append("«IF g.type != null && !g.type.equals(GrammarType.DEFAULT)»«g.type» «ENDIF»grammar «g.");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("name»;");
     return _builder;
   }
   
   protected CharSequence _compile(final Options op) {
     StringConcatenation _builder = new StringConcatenation();
-    String _keyword = op.getKeyword();
-    _builder.append(_keyword);
-    {
-      EList<Option> _options = op.getOptions();
-      for(final Option o : _options) {
-        _builder.append(" ");
-        Object _compile = this.compile(o);
-        _builder.append(_compile);
-        _builder.append(";");
-      }
-    }
-    _builder.append("}");
+    _builder.append("«op.keyword»«FOR o : op.options» «o.compile»;«ENDFOR»}");
     return _builder;
   }
   
   protected CharSequence _compile(final Option o) {
     StringConcatenation _builder = new StringConcatenation();
-    String _name = o.getName();
-    _builder.append(_name);
-    _builder.append(" = ");
-    Object _compile = this.compile(o.getValue());
-    _builder.append(_compile);
+    _builder.append("«o.name» = «o.value.compile»");
     return _builder;
   }
   
   protected CharSequence _compile(final TokenVocab tv) {
     StringConcatenation _builder = new StringConcatenation();
-    String _name = tv.getName();
-    _builder.append(_name);
-    _builder.append(" = ");
-    Grammar _importURI = tv.getImportURI();
-    _builder.append(_importURI);
+    _builder.append("«tv.name» = «tv.importURI»");
     return _builder;
   }
   
   protected CharSequence _compile(final QualifiedOption qop) {
     StringConcatenation _builder = new StringConcatenation();
-    QualifiedId _value = qop.getValue();
-    _builder.append(_value);
+    _builder.append("«qop.value»");
     return _builder;
   }
   
   protected CharSequence _compile(final StringOption qop) {
     StringConcatenation _builder = new StringConcatenation();
-    String _value = qop.getValue();
-    _builder.append(_value);
+    _builder.append("«qop.value»");
     return _builder;
   }
   
   protected CharSequence _compile(final ActionOption qop) {
     StringConcatenation _builder = new StringConcatenation();
-    String _value = qop.getValue();
-    _builder.append(_value);
+    _builder.append("«qop.value»");
     return _builder;
   }
   
   protected CharSequence _compile(final IntOption qop) {
     StringConcatenation _builder = new StringConcatenation();
-    int _value = qop.getValue();
-    _builder.append(_value);
+    _builder.append("«qop.value»");
     return _builder;
   }
   
   protected CharSequence _compile(final Imports im) {
     StringConcatenation _builder = new StringConcatenation();
-    String _keyword = im.getKeyword();
-    _builder.append(_keyword);
-    _builder.append(" ");
-    {
-      EList<Import> _imports = im.getImports();
-      for(final Import i : _imports) {
-        {
-          boolean _equals = im.getImports().get(0).equals(i);
-          boolean _not = (!_equals);
-          if (_not) {
-            _builder.append(", ");
-          }
-        }
-        Object _compile = this.compile(i);
-        _builder.append(_compile);
-      }
-    }
+    _builder.append("«im.keyword» «FOR i : im.imports»«IF !im.imports.get(0).equals(i)», «ENDIF»«i.compile»«ENDFOR»");
     return _builder;
   }
   
   protected CharSequence _compile(final Import i) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      boolean _isEmpty = i.getAlias().isEmpty();
-      boolean _not = (!_isEmpty);
-      if (_not) {
-        String _alias = i.getAlias();
-        _builder.append(_alias);
-        _builder.append(" = ");
-      }
-    }
-    Grammar _importURI = i.getImportURI();
-    _builder.append(_importURI);
+    _builder.append("«IF !i.alias.empty»«i.alias» = «ENDIF»«i.importURI»");
     return _builder;
   }
   
   protected CharSequence _compile(final V4Tokens v4) {
     StringConcatenation _builder = new StringConcatenation();
-    String _keyword = v4.getKeyword();
-    _builder.append(_keyword);
-    _builder.append(" ");
-    {
-      EList<V4Token> _tokens = v4.getTokens();
-      for(final V4Token t : _tokens) {
-        {
-          boolean _equals = v4.getTokens().get(0).equals(t);
-          boolean _not = (!_equals);
-          if (_not) {
-            _builder.append(", ");
-          }
-        }
-        Object _compile = this.compile(t);
-        _builder.append(_compile);
-      }
-    }
+    _builder.append("«v4.keyword» «FOR t : v4.tokens»«IF !v4.tokens.get(0).equals(t)», «ENDIF»«t.compile»«ENDFOR»");
     return _builder;
   }
   
   protected CharSequence _compile(final V4Token v4) {
     StringConcatenation _builder = new StringConcatenation();
-    String _name = v4.getName();
-    _builder.append(_name);
+    _builder.append("«v4.name»");
     return _builder;
   }
   
   protected CharSequence _compile(final EmptyTokens et) {
     StringConcatenation _builder = new StringConcatenation();
-    String _keyword = et.getKeyword();
-    _builder.append(_keyword);
-    _builder.append("}");
+    _builder.append("«et.keyword»}");
     return _builder;
   }
   
   protected CharSequence _compile(final V3Tokens v3) {
     StringConcatenation _builder = new StringConcatenation();
-    String _keyword = v3.getKeyword();
-    _builder.append(_keyword);
-    {
-      EList<V3Token> _tokens = v3.getTokens();
-      for(final V3Token t : _tokens) {
-        _builder.append(" ");
-        Object _compile = this.compile(t);
-        _builder.append(_compile);
-      }
-    }
-    _builder.append("}");
+    _builder.append("«v3.keyword»«FOR t : v3.tokens» «t.compile»«ENDFOR»}");
     return _builder;
   }
   
   protected CharSequence _compile(final V3Token v3) {
     StringConcatenation _builder = new StringConcatenation();
-    String _name = v3.getName();
-    _builder.append(_name);
-    {
-      boolean _isEmpty = v3.getValue().isEmpty();
-      boolean _not = (!_isEmpty);
-      if (_not) {
-        _builder.append(" = ");
-        String _value = v3.getValue();
-        _builder.append(_value);
-      }
-    }
-    _builder.append(";");
+    _builder.append("«v3.name»«IF !v3.value.empty» = «v3.value»«ENDIF»;");
     return _builder;
   }
   
   protected CharSequence _compile(final GrammarAction ga) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("@");
-    {
-      boolean _isNullOrEmpty = StringExtensions.isNullOrEmpty(ga.getScope());
-      boolean _not = (!_isNullOrEmpty);
-      if (_not) {
-        String _scope = ga.getScope();
-        _builder.append(_scope);
-        _builder.append(" ");
-        String _colonSymbol = ga.getColonSymbol();
-        _builder.append(_colonSymbol);
-        _builder.append(" ");
-      }
-    }
-    String _name = ga.getName();
-    _builder.append(_name);
-    _builder.append(" ");
-    String _action = ga.getAction();
-    _builder.append(_action);
-    _builder.newLineIfNotEmpty();
+    _builder.append("@«IF !ga.scope.nullOrEmpty»«ga.scope» «ga.colonSymbol» «ENDIF»«ga.name» «ga.");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("action»");
+    _builder.newLine();
     return _builder;
   }
   
   protected CharSequence _compile(final Mode m) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("mode ");
-    String _id = m.getId();
-    _builder.append(_id);
-    _builder.append(";");
-    {
-      EList<LexerRule> _rules = m.getRules();
-      for(final LexerRule lr : _rules) {
-        Object _compile = this.compile(lr);
-        _builder.append(_compile);
-      }
-    }
+    _builder.append("mode «m.id»;«FOR lr : m.rules»«lr.compile»«ENDFOR»");
     return _builder;
   }
   
   protected CharSequence _compile(final ParserRule pr) {
     StringConcatenation _builder = new StringConcatenation();
-    String _name = pr.getName();
-    _builder.append(_name);
-    {
-      Return _return = pr.getReturn();
-      boolean _notEquals = (!Objects.equal(_return, null));
-      if (_notEquals) {
-        _builder.append(" ");
-        Object _compile = this.compile(pr.getReturn());
-        _builder.append(_compile);
-      }
-    }
-    {
-      net.unicoen.uniMapperGenerator.Exceptions _throws = pr.getThrows();
-      boolean _notEquals_1 = (!Objects.equal(_throws, null));
-      if (_notEquals_1) {
-        _builder.append(" ");
-        Object _compile_1 = this.compile(pr.getThrows());
-        _builder.append(_compile_1);
-      }
-    }
-    {
-      LocalVars _locals = pr.getLocals();
-      boolean _notEquals_2 = (!Objects.equal(_locals, null));
-      if (_notEquals_2) {
-        _builder.append(" ");
-        Object _compile_2 = this.compile(pr.getLocals());
-        _builder.append(_compile_2);
-      }
-    }
-    {
-      EList<RulePrequel> _prequels = pr.getPrequels();
-      for(final RulePrequel p : _prequels) {
-        _builder.append(" ");
-        Object _compile_3 = this.compile(p);
-        _builder.append(_compile_3);
-      }
-    }
-    _builder.newLineIfNotEmpty();
+    _builder.append("«pr.name»«IF pr.^return != null» «pr.^return.compile»«ENDIF»«IF pr.throws != null» «pr.throws.compile»«ENDIF»«IF pr.");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("locals != null» «pr.locals.compile»«ENDIF»«FOR p : pr.prequels» «p.compile»«ENDFOR»");
+    _builder.newLine();
     _builder.append("\t");
-    _builder.append(":");
-    Object _compile_4 = this.compile(pr.getBody());
-    _builder.append(_compile_4, "\t");
-    Object _compile_5 = this.compile(pr.getCaught());
-    _builder.append(_compile_5, "\t");
-    _builder.newLineIfNotEmpty();
+    _builder.append(":«pr.body.compile»«pr.caught.compile»");
+    _builder.newLine();
     _builder.append("\t");
-    String _semicolonSymbol = pr.getSemicolonSymbol();
-    _builder.append(_semicolonSymbol, "\t");
-    _builder.newLineIfNotEmpty();
+    _builder.append("«pr.semicolonSymbol»");
+    _builder.newLine();
     return _builder;
   }
   
   protected CharSequence _compile(final ExceptionGroup eg) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      EList<ExceptionHandler> _handlers = eg.getHandlers();
-      for(final ExceptionHandler e : _handlers) {
-      }
-    }
-    {
-      FinallyClause _finally = eg.getFinally();
-      boolean _notEquals = (!Objects.equal(_finally, null));
-      if (_notEquals) {
-        Object _compile = this.compile(eg.getFinally());
-        _builder.append(_compile);
-      }
-    }
+    _builder.append("«FOR e : eg.handlers»«ENDFOR»«IF eg.^finally != null»«eg.^finally.compile»«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final ExceptionHandler eh) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("catch ");
-    String _exception = eh.getException();
-    _builder.append(_exception);
-    _builder.append(" ");
-    String _body = eh.getBody();
-    _builder.append(_body);
+    _builder.append("catch «eh.exception» «eh.body»");
     return _builder;
   }
   
   protected CharSequence _compile(final FinallyClause fc) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("finally ");
-    String _body = fc.getBody();
-    _builder.append(_body);
+    _builder.append("finally «fc.body»");
     return _builder;
   }
   
   protected CharSequence _compile(final Return re) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("returns ");
-    String _body = re.getBody();
-    _builder.append(_body);
+    _builder.append("returns «re.body»");
     return _builder;
   }
   
   protected CharSequence _compile(final net.unicoen.uniMapperGenerator.Exceptions ex) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("throws ");
-    {
-      EList<QualifiedId> _exceptions = ex.getExceptions();
-      for(final QualifiedId e : _exceptions) {
-        {
-          boolean _equals = ex.getExceptions().get(0).equals(e);
-          boolean _not = (!_equals);
-          if (_not) {
-            _builder.append(",");
-          }
-        }
-        _builder.append(" ");
-        _builder.append(e);
-      }
-    }
+    _builder.append("throws «FOR e : ex.exceptions»«IF !ex.exceptions.get(0).equals(e)»,«ENDIF» «e»«ENDFOR»");
     return _builder;
   }
   
   protected CharSequence _compile(final LocalVars lv) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("locals ");
-    String _body = lv.getBody();
-    _builder.append(_body);
+    _builder.append("locals «lv.body»");
     return _builder;
   }
   
   protected CharSequence _compile(final RuleAction ra) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("@");
-    String _name = ra.getName();
-    _builder.append(_name);
-    _builder.append(" ");
-    String _body = ra.getBody();
-    _builder.append(_body);
+    _builder.append("@«ra.name» «ra.body»");
     return _builder;
   }
   
   protected CharSequence _compile(final RuleAltList ral) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      EList<LabeledAlt> _alternatives = ral.getAlternatives();
-      for(final LabeledAlt a : _alternatives) {
-        {
-          boolean _equals = ral.getAlternatives().get(0).equals(a);
-          boolean _not = (!_equals);
-          if (_not) {
-            _builder.newLineIfNotEmpty();
-            _builder.append("|");
-          }
-        }
-        _builder.append("\t");
-        Object _compile = this.compile(a);
-        _builder.append(_compile);
-      }
-    }
+    _builder.append("«FOR a : ral.alternatives»«IF !ral.alternatives.get(0).equals(a)»");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("|«ENDIF»\t«a.compile»«ENDFOR»");
     return _builder;
   }
   
   protected CharSequence _compile(final LabeledAlt la) {
     StringConcatenation _builder = new StringConcatenation();
-    Object _compile = this.compile(la.getBody());
-    _builder.append(_compile);
-    {
-      String _label = la.getLabel();
-      boolean _notEquals = (!Objects.equal(_label, null));
-      if (_notEquals) {
-        _builder.append(" #");
-        String _label_1 = la.getLabel();
-        _builder.append(_label_1);
-      }
-    }
+    _builder.append("«la.body.compile»«IF la.label != null» #«la.label»«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final Alternative al) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      ElementOptions _options = al.getOptions();
-      boolean _notEquals = (!Objects.equal(_options, null));
-      if (_notEquals) {
-        Object _compile = this.compile(al.getOptions());
-        _builder.append(_compile);
-        _builder.append(" ");
-      }
-    }
-    {
-      EList<Element> _elements = al.getElements();
-      for(final Element e : _elements) {
-        Object _compile_1 = this.compile(e);
-        _builder.append(_compile_1);
-      }
-    }
+    _builder.append("«IF al.options != null»«al.options.compile» «ENDIF»«FOR e : al.elements»«e.");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("compile»«ENDFOR»");
     return _builder;
   }
   
   protected CharSequence _compile(final Element el) {
     StringConcatenation _builder = new StringConcatenation();
-    Object _compile = this.compile(el.getBody());
-    _builder.append(_compile);
-    {
-      EbnfSuffix _operator = el.getOperator();
-      boolean _notEquals = (!Objects.equal(_operator, null));
-      if (_notEquals) {
-        Object _compile_1 = this.compile(el.getOperator());
-        _builder.append(_compile_1);
-      }
-    }
-    _builder.append(" ");
+    _builder.append("«el.body.compile»«IF el.operator != null»«el.operator.compile»«ENDIF» ");
     return _builder;
   }
   
   protected CharSequence _compile(final Ebnf eb) {
     StringConcatenation _builder = new StringConcatenation();
-    Object _compile = this.compile(eb.getBody());
-    _builder.append(_compile);
-    {
-      EbnfSuffix _operator = eb.getOperator();
-      boolean _notEquals = (!Objects.equal(_operator, null));
-      if (_notEquals) {
-        Object _compile_1 = this.compile(eb.getOperator());
-        _builder.append(_compile_1);
-      }
-    }
+    _builder.append("«eb.body.compile»«IF eb.operator != null»«eb.operator.compile»«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final ActionElement ae) {
     StringConcatenation _builder = new StringConcatenation();
-    String _body = ae.getBody();
-    _builder.append(_body);
-    {
-      ElementOptions _options = ae.getOptions();
-      boolean _notEquals = (!Objects.equal(_options, null));
-      if (_notEquals) {
-        Object _compile = this.compile(ae.getOptions());
-        _builder.append(_compile);
-      }
-    }
+    _builder.append("«ae.body»«IF ae.options != null»«ae.options.compile»«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final LabeledElement le) {
     StringConcatenation _builder = new StringConcatenation();
-    String _name = le.getName();
-    _builder.append(_name);
-    _builder.append(" ");
-    String _op = le.getOp();
-    _builder.append(_op);
-    _builder.append(" ");
-    Object _compile = this.compile(le.getBody());
-    _builder.append(_compile);
+    _builder.append("«le.name» «le.op» «le.body.compile»");
     return _builder;
   }
   
   protected CharSequence _compile(final EbnfSuffix es) {
     StringConcatenation _builder = new StringConcatenation();
-    String _operator = es.getOperator();
-    _builder.append(_operator);
-    {
-      String _nongreedy = es.getNongreedy();
-      boolean _notEquals = (!Objects.equal(_nongreedy, null));
-      if (_notEquals) {
-        _builder.append(" ");
-        String _nongreedy_1 = es.getNongreedy();
-        _builder.append(_nongreedy_1);
-      }
-    }
+    _builder.append("«es.operator»«IF es.nongreedy != null» «es.nongreedy»«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final Block bl) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("(");
-    {
-      String _colon = bl.getColon();
-      boolean _notEquals = (!Objects.equal(_colon, null));
-      if (_notEquals) {
-        {
-          Options _options = bl.getOptions();
-          boolean _notEquals_1 = (!Objects.equal(_options, null));
-          if (_notEquals_1) {
-            Object _compile = this.compile(bl.getOptions());
-            _builder.append(_compile);
-          }
-        }
-        {
-          EList<RuleAction> _actions = bl.getActions();
-          for(final RuleAction a : _actions) {
-            _builder.append(" ");
-            Object _compile_1 = this.compile(a);
-            _builder.append(_compile_1);
-          }
-        }
-        _builder.append(": ");
-      }
-    }
-    Object _compile_2 = this.compile(bl.getBody());
-    _builder.append(_compile_2);
-    _builder.append(")");
+    _builder.append("(«IF bl.colon != null»«IF bl.options != null»«bl.options.compile»«ENDIF»«FOR a : bl.");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("actions» «a.compile»«ENDFOR»: «ENDIF»«bl.body.compile»)");
     return _builder;
   }
   
   protected CharSequence _compile(final AltList al) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      EList<Alternative> _alternatives = al.getAlternatives();
-      for(final Alternative a : _alternatives) {
-        {
-          boolean _equals = al.getAlternatives().get(0).equals(a);
-          boolean _not = (!_equals);
-          if (_not) {
-            _builder.append("|");
-          }
-        }
-        Object _compile = this.compile(a);
-        _builder.append(_compile);
-      }
-    }
+    _builder.append("«FOR a : al.alternatives»«IF !al.alternatives.get(0).equals(a)»|«ENDIF»«a.");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("compile»«ENDFOR»");
     return _builder;
   }
   
   protected CharSequence _compile(final Atom at) {
     StringConcatenation _builder = new StringConcatenation();
-    Object _compile = this.compile(at.getBody());
-    _builder.append(_compile);
+    _builder.append("«at.body.compile»");
     return _builder;
   }
   
   protected CharSequence _compile(final RuleRef rr) {
     StringConcatenation _builder = new StringConcatenation();
-    String _name = rr.getReference().getName();
-    _builder.append(_name);
-    {
-      ElementOptions _options = rr.getOptions();
-      boolean _notEquals = (!Objects.equal(_options, null));
-      if (_notEquals) {
-        Object _compile = this.compile(rr.getOptions());
-        _builder.append(_compile);
-      }
-    }
+    _builder.append("«rr.reference.name»«IF rr.options != null»«rr.options.compile»«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final ElementOptions eo) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("<");
-    {
-      EList<ElementOption> _options = eo.getOptions();
-      for(final ElementOption o : _options) {
-        Object _compile = this.compile(o);
-        _builder.append(_compile);
-        _builder.append(",");
-      }
-    }
-    _builder.append(">");
+    _builder.append("<«FOR o : eo.options»«o.compile»,«ENDFOR»>");
     return _builder;
   }
   
   protected CharSequence _compile(final Range ra) {
     StringConcatenation _builder = new StringConcatenation();
-    String _from = ra.getFrom();
-    _builder.append(_from);
-    _builder.append("..");
-    String _to = ra.getTo();
-    _builder.append(_to);
-    _builder.append(" ");
+    _builder.append("«ra.from»..«ra.to» ");
     return _builder;
   }
   
   protected CharSequence _compile(final Terminal te) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      TokenRef _reference = te.getReference();
-      boolean _notEquals = (!Objects.equal(_reference, null));
-      if (_notEquals) {
-        CharSequence _refCompile = this.refCompile(te.getReference());
-        _builder.append(_refCompile);
-        {
-          ElementOptions _options = te.getOptions();
-          boolean _notEquals_1 = (!Objects.equal(_options, null));
-          if (_notEquals_1) {
-            Object _compile = this.compile(te.getOptions());
-            _builder.append(_compile);
-          }
-        }
-      } else {
-        String _literal = te.getLiteral();
-        boolean _notEquals_2 = (!Objects.equal(_literal, null));
-        if (_notEquals_2) {
-          _builder.newLineIfNotEmpty();
-          String _literal_1 = te.getLiteral();
-          _builder.append(_literal_1);
-          _builder.newLineIfNotEmpty();
-          {
-            ElementOptions _options_1 = te.getOptions();
-            boolean _notEquals_3 = (!Objects.equal(_options_1, null));
-            if (_notEquals_3) {
-              _builder.append(" ");
-              Object _compile_1 = this.compile(te.getOptions());
-              _builder.append(_compile_1);
-            }
-          }
-        }
-      }
-    }
+    _builder.append("«IF te.reference != null»«te.reference.refCompile»«IF te.options != null»«te.");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("options.compile»«ENDIF»«ELSEIF te.literal != null»");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("«te.literal»");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("«IF te.options != null» «te.options.compile»«ENDIF»«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final NotSet ns) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("~");
-    Object _compile = this.compile(ns.getBody());
-    _builder.append(_compile);
+    _builder.append("~«ns.body.compile»");
     return _builder;
   }
   
   protected CharSequence _compile(final BlockSet bs) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("(");
-    {
-      EList<SetElement> _elements = bs.getElements();
-      for(final SetElement e : _elements) {
-        {
-          boolean _equals = bs.getElements().get(0).equals(e);
-          boolean _not = (!_equals);
-          if (_not) {
-            _builder.append("|");
-          }
-        }
-        Object _compile = this.compile(e);
-        _builder.append(_compile);
-      }
-    }
-    _builder.append(")");
+    _builder.append("(«FOR e : bs.elements»«IF !bs.elements.get(0).equals(e)»|«ENDIF»«e.compile»«ENDFOR»)");
     return _builder;
   }
   
   protected CharSequence _compile(final SetElement se) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      String _tokenRef = se.getTokenRef();
-      boolean _notEquals = (!Objects.equal(_tokenRef, null));
-      if (_notEquals) {
-        String _tokenRef_1 = se.getTokenRef();
-        _builder.append(_tokenRef_1);
-      } else {
-        String _stringLiteral = se.getStringLiteral();
-        boolean _notEquals_1 = (!Objects.equal(_stringLiteral, null));
-        if (_notEquals_1) {
-          String _stringLiteral_1 = se.getStringLiteral();
-          _builder.append(_stringLiteral_1);
-        } else {
-          Range _range = se.getRange();
-          boolean _notEquals_2 = (!Objects.equal(_range, null));
-          if (_notEquals_2) {
-            Range _range_1 = se.getRange();
-            _builder.append(_range_1);
-          } else {
-            String _charSet = se.getCharSet();
-            _builder.append(_charSet);
-          }
-        }
-      }
-    }
+    _builder.append("«IF se.tokenRef != null»«se.tokenRef»«ELSEIF se.stringLiteral != null»«se.stringLiteral»«ELSEIF se.");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("range != null»«se.range»«ELSE»«se.charSet»«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final Wildcard wi) {
     StringConcatenation _builder = new StringConcatenation();
-    String _dot = wi.getDot();
-    _builder.append(_dot);
-    {
-      ElementOptions _options = wi.getOptions();
-      boolean _notEquals = (!Objects.equal(_options, null));
-      if (_notEquals) {
-        Object _compile = this.compile(wi.getOptions());
-        _builder.append(_compile);
-      }
-    }
+    _builder.append("«wi.dot»«IF wi.options != null»«wi.options.compile»«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final ElementOption eo) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      QualifiedId _qualifiedId = eo.getQualifiedId();
-      boolean _notEquals = (!Objects.equal(_qualifiedId, null));
-      if (_notEquals) {
-        Object _compile = this.compile(eo.getQualifiedId());
-        _builder.append(_compile);
-      } else {
-        String _id = eo.getId();
-        _builder.append(_id);
-        _builder.append(" ");
-        String _assign = eo.getAssign();
-        _builder.append(_assign);
-        _builder.append(" ");
-        OptionValue _value = eo.getValue();
-        _builder.append(_value);
-      }
-    }
+    _builder.append("«IF eo.qualifiedId != null»«eo.qualifiedId.compile»«ELSE»«eo.id» «eo.");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("assign» «eo.value»«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final LexerRule lr) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      boolean _isFragment = lr.isFragment();
-      if (_isFragment) {
-        _builder.append("fragment");
-        _builder.newLineIfNotEmpty();
-      }
-    }
-    String _name = lr.getName();
-    _builder.append(_name);
-    _builder.newLineIfNotEmpty();
+    _builder.append("«IF lr.^fragment»fragment");
+    _builder.newLine();
+    _builder.append("«ENDIF»«lr.name»");
+    _builder.newLine();
     _builder.append("\t");
-    _builder.append(":");
-    Object _compile = this.compile(lr.getBody());
-    _builder.append(_compile, "\t");
-    _builder.newLineIfNotEmpty();
+    _builder.append(":«lr.body.compile»");
+    _builder.newLine();
     _builder.append("\t");
     _builder.append(";");
     _builder.newLine();
@@ -1019,209 +581,105 @@ public class ANTLRGrammarGenerator {
   
   protected CharSequence _compile(final LexerAltList lal) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      EList<LexerAlt> _alternatives = lal.getAlternatives();
-      for(final LexerAlt a : _alternatives) {
-        {
-          boolean _equals = lal.getAlternatives().get(0).equals(a);
-          boolean _not = (!_equals);
-          if (_not) {
-            _builder.append("|");
-          }
-        }
-        _builder.append("\t");
-        Object _compile = this.compile(a);
-        _builder.append(_compile);
-        _builder.newLineIfNotEmpty();
-      }
-    }
+    _builder.append("«FOR a : lal.alternatives»«IF !lal.alternatives.get(0).equals(a)»|«ENDIF»\t«a.");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("compile»");
+    _builder.newLine();
+    _builder.append("«ENDFOR»");
     return _builder;
   }
   
   protected CharSequence _compile(final LexerAlt la) {
     StringConcatenation _builder = new StringConcatenation();
-    Object _compile = this.compile(la.getBody());
-    _builder.append(_compile);
-    {
-      LexerCommands _commands = la.getCommands();
-      boolean _notEquals = (!Objects.equal(_commands, null));
-      if (_notEquals) {
-        _builder.append(" ");
-        Object _compile_1 = this.compile(la.getCommands());
-        _builder.append(_compile_1);
-      }
-    }
+    _builder.append("«la.body.compile»«IF la.commands != null» «la.commands.compile»«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final LexerElements le) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      EList<LexerElementWithDollar> _elements = le.getElements();
-      for(final LexerElementWithDollar e : _elements) {
-        Object _compile = this.compile(e);
-        _builder.append(_compile);
-      }
-    }
+    _builder.append("«FOR e : le.elements»«e.compile»«ENDFOR»");
     return _builder;
   }
   
   protected CharSequence _compile(final LexerElementWithDollar led) {
     StringConcatenation _builder = new StringConcatenation();
-    Object _compile = this.compile(led.getBody());
-    _builder.append(_compile);
+    _builder.append("«led.body.compile»");
     return _builder;
   }
   
   protected CharSequence _compile(final LexerElement le) {
     StringConcatenation _builder = new StringConcatenation();
-    Object _compile = this.compile(le.getBody());
-    _builder.append(_compile);
-    {
-      EbnfSuffix _operator = le.getOperator();
-      boolean _notEquals = (!Objects.equal(_operator, null));
-      if (_notEquals) {
-        Object _compile_1 = this.compile(le.getOperator());
-        _builder.append(_compile_1);
-      }
-    }
-    _builder.append(" ");
+    _builder.append("«le.body.compile»«IF le.operator != null»«le.operator.compile»«ENDIF» ");
     return _builder;
   }
   
   protected CharSequence _compile(final LabeledLexerElement lle) {
     StringConcatenation _builder = new StringConcatenation();
-    String _label = lle.getLabel();
-    _builder.append(_label);
-    _builder.append(" ");
-    String _op = lle.getOp();
-    _builder.append(_op);
-    _builder.append(" ");
-    Object _compile = this.compile(lle.getBody());
-    _builder.append(_compile);
+    _builder.append("«lle.label» «lle.op» «lle.body.compile»");
     return _builder;
   }
   
   protected CharSequence _compile(final LexerAtom la) {
     StringConcatenation _builder = new StringConcatenation();
-    Object _compile = this.compile(la.getBody());
-    _builder.append(_compile);
+    _builder.append("«la.body.compile»");
     return _builder;
   }
   
   protected CharSequence _compile(final LexerCharSet lcs) {
     StringConcatenation _builder = new StringConcatenation();
-    String _body = lcs.getBody();
-    _builder.append(_body);
+    _builder.append("«lcs.body»");
     return _builder;
   }
   
   protected CharSequence _compile(final LexerBlock lb) {
     StringConcatenation _builder = new StringConcatenation();
-    _builder.append("(");
-    {
-      Options _options = lb.getOptions();
-      boolean _notEquals = (!Objects.equal(_options, null));
-      if (_notEquals) {
-        Options _options_1 = lb.getOptions();
-        _builder.append(_options_1);
-        _builder.append(" :");
-      }
-    }
-    Object _compile = this.compile(lb.getBody());
-    _builder.append(_compile);
-    _builder.append(")");
+    _builder.append("(«IF lb.options != null»«lb.options» :«ENDIF»«lb.body.compile»)");
     return _builder;
   }
   
   protected CharSequence _compile(final LexerCommands lc) {
     StringConcatenation _builder = new StringConcatenation();
-    String _keyword = lc.getKeyword();
-    _builder.append(_keyword);
-    {
-      EList<LexerCommand> _commands = lc.getCommands();
-      for(final LexerCommand c : _commands) {
-        {
-          boolean _equals = lc.getCommands().get(0).equals(c);
-          boolean _not = (!_equals);
-          if (_not) {
-            _builder.append("|");
-          }
-        }
-        Object _compile = this.compile(c);
-        _builder.append(_compile);
-      }
-    }
+    _builder.append("«lc.keyword»«FOR c : lc.commands»«IF !lc.commands.get(0).equals(c)»|«ENDIF»«c.");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("compile»«ENDFOR»");
     return _builder;
   }
   
   protected CharSequence _compile(final LexerCommand lc) {
     StringConcatenation _builder = new StringConcatenation();
-    String _name = lc.getName();
-    _builder.append(_name);
-    {
-      LexerCommandExpr _args = lc.getArgs();
-      boolean _notEquals = (!Objects.equal(_args, null));
-      if (_notEquals) {
-        _builder.append("(");
-        Object _compile = this.compile(lc.getArgs());
-        _builder.append(_compile);
-        _builder.append(")");
-      }
-    }
+    _builder.append("«lc.name»«IF lc.args != null»(«lc.args.compile»)«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final LexerCommandExpr lce) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      LexerCommandArg _ref = lce.getRef();
-      boolean _notEquals = (!Objects.equal(_ref, null));
-      if (_notEquals) {
-        Object _compile = this.compile(lce.getRef());
-        _builder.append(_compile);
-      } else {
-        int _value = lce.getValue();
-        _builder.append(_value);
-      }
-    }
+    _builder.append("«IF lce.ref != null»«lce.ref.compile»«ELSE»«lce.value»«ENDIF»");
     return _builder;
   }
   
   protected CharSequence _compile(final QualifiedId qi) {
     StringConcatenation _builder = new StringConcatenation();
-    {
-      EList<String> _name = qi.getName();
-      for(final String n : _name) {
-        _builder.append(n);
-        _builder.append(".");
-      }
-    }
+    _builder.append("«FOR n : qi.name»«n».«ENDFOR»");
     return _builder;
   }
   
   protected CharSequence _refCompile(final V3Token v3) {
     StringConcatenation _builder = new StringConcatenation();
-    String _name = v3.getName();
-    _builder.append(_name);
-    _builder.append(" = ");
-    String _value = v3.getValue();
-    _builder.append(_value);
-    _builder.append(";");
+    _builder.append("«v3.name» = «v3.value»;");
     return _builder;
   }
   
   protected CharSequence _refCompile(final V4Token v4) {
     StringConcatenation _builder = new StringConcatenation();
-    String _name = v4.getName();
-    _builder.append(_name);
+    _builder.append("«v4.name»");
     return _builder;
   }
   
   protected CharSequence _refCompile(final LexerRule lr) {
     StringConcatenation _builder = new StringConcatenation();
-    String _name = lr.getName();
-    _builder.append(_name);
+    _builder.append("«lr.name»");
     return _builder;
   }
   

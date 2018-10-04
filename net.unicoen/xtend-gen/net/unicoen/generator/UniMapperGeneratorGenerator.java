@@ -4,7 +4,6 @@
 package net.unicoen.generator;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -17,13 +16,11 @@ import net.unicoen.uniMapperGenerator.Element;
 import net.unicoen.uniMapperGenerator.Grammar;
 import net.unicoen.uniMapperGenerator.LexerRule;
 import net.unicoen.uniMapperGenerator.ParserRule;
-import net.unicoen.uniMapperGenerator.QualifiedId;
 import net.unicoen.uniMapperGenerator.RuleRef;
 import net.unicoen.uniMapperGenerator.Terminal;
 import net.unicoen.uniMapperGenerator.TokenRef;
 import net.unicoen.uniMapperGenerator.UnicoenTypeDec;
 import net.unicoen.util.InvokingStateAnalyzer;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtend2.lib.StringConcatenation;
@@ -91,49 +88,35 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("import { TerminalNode } from \"antlr4ts/tree/TerminalNode\";");
     _builder.newLine();
     _builder.newLine();
-    _builder.append("import { ");
-    _builder.append(this._grammarName);
-    _builder.append("Lexer } from \'./");
-    _builder.append(this._grammarName);
-    _builder.append("Lexer\';");
-    _builder.newLineIfNotEmpty();
-    _builder.append("import { ");
-    _builder.append(this._grammarName);
-    _builder.append("Parser } from \'./");
-    _builder.append(this._grammarName);
-    _builder.append("Parser\';");
-    _builder.newLineIfNotEmpty();
-    _builder.append("import { ");
-    _builder.append(this._grammarName);
-    _builder.append("Visitor } from \'./");
-    _builder.append(this._grammarName);
-    _builder.append("Visitor\';");
-    _builder.newLineIfNotEmpty();
+    _builder.append("import { «_grammarName»Lexer } from \'./«_grammarName»Lexer\';");
+    _builder.newLine();
+    _builder.append("import { «_grammarName»Parser } from \'./«_grammarName»Parser\';");
+    _builder.newLine();
+    _builder.append("import { «_grammarName»Visitor } from \'./«_grammarName»Visitor\';");
+    _builder.newLine();
     _builder.append("\t\t");
     _builder.newLine();
     _builder.append("import { ");
     _builder.newLine();
-    {
-      Iterable<ParserRule> _filter = Iterables.<ParserRule>filter(g.getRules(), ParserRule.class);
-      for(final ParserRule r : _filter) {
-        {
-          if ((((!(((r.getType() != null) && (r.getType().getType().getName() != null)) && r.getType().getType().getName().endsWith("Literal"))) && (r.getType() != null)) || (IteratorExtensions.<Element>findFirst(Iterators.<Element>filter(r.eAllContents(), Element.class), ((Function1<Element, Boolean>) (Element it) -> {
-            String _op = it.getOp();
-            return Boolean.valueOf((_op != null));
-          })) != null))) {
-            String _camelCase = this.toCamelCase(r.getName());
-            _builder.append(_camelCase);
-            _builder.append("Context,");
-            _builder.newLineIfNotEmpty();
-          }
-        }
-      }
-    }
+    _builder.append("«FOR r : g.rules.filter(ParserRule)»");
+    _builder.newLine();
     _builder.append("\t");
-    _builder.append("} from \"./");
-    _builder.append(this._grammarName, "\t");
-    _builder.append("Parser\";");
-    _builder.newLineIfNotEmpty();
+    _builder.append("«IF !(r.type !== null && r.type.type.name !== null && r.type.type.name.endsWith(\"Literal\"))");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("&& r.type !== null || r.eAllContents.filter(Element).findFirst[it.op !== null] !== null»\t\t\t");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("«r.name.toCamelCase»Context,");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("«ENDIF»");
+    _builder.newLine();
+    _builder.append("«ENDFOR»");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("} from \"./«_grammarName»Parser\";");
+    _builder.newLine();
     _builder.newLine();
     _builder.append("import { CodeLocation } from \'../../node_helper/CodeLocation\';");
     _builder.newLine();
@@ -220,9 +203,8 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("// tslint:disable");
     _builder.newLine();
-    CharSequence _generateImports = this.generateImports(g);
-    _builder.append(_generateImports);
-    _builder.newLineIfNotEmpty();
+    _builder.append("«g.generateImports»");
+    _builder.newLine();
     _builder.newLine();
     _builder.append("class Comment {");
     _builder.newLine();
@@ -235,21 +217,15 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("}");
     _builder.newLine();
     _builder.newLine();
-    _builder.append("export class ");
-    _builder.append(this._grammarName);
-    _builder.append("Mapper implements ");
-    _builder.append(this._grammarName);
-    _builder.append("Visitor<any> {");
-    _builder.newLineIfNotEmpty();
+    _builder.append("export class «_grammarName»Mapper implements «_grammarName»Visitor<any> {");
+    _builder.newLine();
     _builder.newLine();
     _builder.append("\t");
     _builder.append("private isDebugMode:boolean = false;");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("private parser:");
-    _builder.append(this._grammarName, "\t");
-    _builder.append("Parser;");
-    _builder.newLineIfNotEmpty();
+    _builder.append("private parser:«_grammarName»Parser;");
+    _builder.newLine();
     _builder.append("\t");
     _builder.append("private\t_comments:Comment[] = [];");
     _builder.newLine();
@@ -281,18 +257,14 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("const chars = new ANTLRInputStream(code);");
     _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("const lexer = new ");
-    _builder.append(this._grammarName, "\t\t");
-    _builder.append("Lexer(chars);");
-    _builder.newLineIfNotEmpty();
+    _builder.append("const lexer = new «_grammarName»Lexer(chars);");
+    _builder.newLine();
     _builder.append("\t\t");
     _builder.append("const tokens = new CommonTokenStream(lexer);");
     _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("this.parser = new ");
-    _builder.append(this._grammarName, "\t\t");
-    _builder.append("Parser(tokens);");
-    _builder.newLineIfNotEmpty();
+    _builder.append("this.parser = new «_grammarName»Parser(tokens);");
+    _builder.newLine();
     _builder.append("\t\t");
     _builder.append("const tree = this.parser.translationunit();");
     _builder.newLine();
@@ -319,24 +291,17 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("parseCore(chars:ANTLRInputStream) {");
     _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("const lexer = new ");
-    _builder.append(this._grammarName, "\t\t");
-    _builder.append("Lexer(chars);");
-    _builder.newLineIfNotEmpty();
+    _builder.append("const lexer = new «_grammarName»Lexer(chars);");
+    _builder.newLine();
     _builder.append("\t\t");
     _builder.append("const tokens = new CommonTokenStream(lexer);");
     _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("this.parser = new ");
-    _builder.append(this._grammarName, "\t\t");
-    _builder.append("Parser(tokens);");
-    _builder.newLineIfNotEmpty();
+    _builder.append("this.parser = new «_grammarName»Parser(tokens);");
+    _builder.newLine();
     _builder.append("\t\t");
-    _builder.append("const tree = this.parser.");
-    String _name = g.getRoot().getRoot().getName();
-    _builder.append(_name, "\t\t");
-    _builder.append("();");
-    _builder.newLineIfNotEmpty();
+    _builder.append("const tree = this.parser.«g.root.root.name»();");
+    _builder.newLine();
     _builder.newLine();
     _builder.append("\t\t");
     _builder.append("this._comments = [];");
@@ -350,61 +315,53 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("\t\t");
     _builder.append("this._nextTokenIndex = 0;");
     _builder.newLine();
-    {
-      int _size = g.getRules().size();
-      boolean _greaterThan = (_size > 0);
-      if (_greaterThan) {
-        _builder.append("\t\t");
-        _builder.append("const ret = new UniProgram(this.visit(tree));");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("ret.codeRange = ret.block.codeRange;");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("if (this._lastNode !== null) {");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("\t");
-        _builder.append("const count = this._stream.getTokens().length - 1");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("\t");
-        _builder.append("for (var i = this._nextTokenIndex; i < count; i++) {");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("\t\t");
-        _builder.append("const hiddenToken = this._stream.getTokens()[i]; // Includes skipped tokens (maybe)");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("\t\t");
-        _builder.append("if (this._lastNode.comments === null) {");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("\t\t\t");
-        _builder.append("this._lastNode.comments = [];");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("\t\t");
-        _builder.append("}");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("\t\t");
-        _builder.append("this._lastNode.comments.push(hiddenToken.text);");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("\t");
-        _builder.append("}");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("}");
-        _builder.newLine();
-        _builder.append("\t\t");
-        _builder.append("return ret;");
-        _builder.newLine();
-      }
-    }
+    _builder.append("\t\t");
+    _builder.append("«IF g.rules.size > 0»");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("const ret = new UniProgram(this.visit(tree));");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("ret.codeRange = ret.block.codeRange;");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("if (this._lastNode !== null) {");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("const count = this._stream.getTokens().length - 1");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("for (var i = this._nextTokenIndex; i < count; i++) {");
+    _builder.newLine();
+    _builder.append("\t\t\t\t");
+    _builder.append("const hiddenToken = this._stream.getTokens()[i]; // Includes skipped tokens (maybe)");
+    _builder.newLine();
+    _builder.append("\t\t\t\t");
+    _builder.append("if (this._lastNode.comments === null) {");
+    _builder.newLine();
+    _builder.append("\t\t\t\t\t");
+    _builder.append("this._lastNode.comments = [];");
+    _builder.newLine();
+    _builder.append("\t\t\t\t");
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("\t\t\t\t");
+    _builder.append("this._lastNode.comments.push(hiddenToken.text);");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("return ret;");
+    _builder.newLine();
+    _builder.append("\t  ");
+    _builder.append("«ENDIF»");
+    _builder.newLine();
     _builder.append("\t");
     _builder.append("}");
     _builder.newLine();
@@ -437,10 +394,8 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("\t");
     _builder.newLine();
     _builder.append("\t");
-    _builder.append("def parseFile(String path, Function1<");
-    _builder.append(this._grammarName, "\t");
-    _builder.append("Parser, ParseTree> parseAction) {");
-    _builder.newLineIfNotEmpty();
+    _builder.append("def parseFile(String path, Function1<«_grammarName»Parser, ParseTree> parseAction) {");
+    _builder.newLine();
     _builder.append("\t\t");
     _builder.append("val inputStream = new FileInputStream(path)");
     _builder.newLine();
@@ -1220,31 +1175,29 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("}");
     _builder.newLine();
     _builder.newLine();
-    {
-      Iterable<ParserRule> _filter = Iterables.<ParserRule>filter(g.getRules(), ParserRule.class);
-      for(final ParserRule r : _filter) {
-        {
-          if ((((r.getType() != null) && (r.getType().getType().getName() != null)) && r.getType().getType().getName().endsWith("Literal"))) {
-            _builder.append("\t");
-            CharSequence _makeLiteralMethod = this.makeLiteralMethod(r);
-            _builder.append(_makeLiteralMethod, "\t");
-            _builder.newLineIfNotEmpty();
-            _builder.newLine();
-          } else {
-            if (((r.getType() != null) || (IteratorExtensions.<Element>findFirst(Iterators.<Element>filter(r.eAllContents(), Element.class), ((Function1<Element, Boolean>) (Element it) -> {
-              String _op = it.getOp();
-              return Boolean.valueOf((_op != null));
-            })) != null))) {
-              _builder.append("\t");
-              CharSequence _makeVisitMethod = this.makeVisitMethod(r);
-              _builder.append(_makeVisitMethod, "\t");
-              _builder.newLineIfNotEmpty();
-              _builder.newLine();
-            }
-          }
-        }
-      }
-    }
+    _builder.append("\t");
+    _builder.append("«FOR r : g.rules.filter(ParserRule)»");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("«IF r.type !== null && r.type.type.name !== null && r.type.type.name.endsWith(\"Literal\")»");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("«r.makeLiteralMethod»");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("«ELSEIF r.type !== null || r.eAllContents.filter(Element).findFirst[it.op !== null] !== null»");
+    _builder.newLine();
+    _builder.append("\t\t\t");
+    _builder.append("«r.makeVisitMethod»");
+    _builder.newLine();
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("«ENDIF»");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("«ENDFOR»");
+    _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     return _builder;
@@ -1270,26 +1223,23 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
       }
       final String typeName = _xifexpression;
       StringConcatenation _builder = new StringConcatenation();
-      _builder.append("public visit");
-      _builder.append(ruleName);
-      _builder.append("(ctx:");
-      _builder.append(ruleName);
-      _builder.append("Context) {");
-      _builder.newLineIfNotEmpty();
-      {
-        boolean _equals = Objects.equal(typeName, "List");
-        if (_equals) {
-          _builder.append("\t");
-          CharSequence _makeListMethodBody = this.makeListMethodBody(r, r.getType().getType().getTypevalue());
-          _builder.append(_makeListMethodBody, "\t");
-          _builder.newLineIfNotEmpty();
-        } else {
-          _builder.append("\t");
-          CharSequence _makeMethodBody = this.makeMethodBody(r);
-          _builder.append(_makeMethodBody, "\t");
-          _builder.newLineIfNotEmpty();
-        }
-      }
+      _builder.append("public visit«ruleName»(ctx:«ruleName»Context) {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("«IF typeName==\"List\"»");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("«r.makeListMethodBody(r.type.type.typevalue)»");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("«ELSE»");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("«r.makeMethodBody»");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
       _builder.append("}");
       _builder.newLine();
       _xblockexpression = _builder;
@@ -1330,64 +1280,22 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
       _builder.newLine();
       _builder.append("map.set(\"none\", none);");
       _builder.newLine();
-      {
-        for(final String it : annotationList) {
-          {
-            boolean _notEquals = (!Objects.equal(it, "MERGE"));
-            if (_notEquals) {
-              _builder.append("const ");
-              String _xifexpression = null;
-              boolean _equals = Objects.equal(it, "ADD");
-              if (_equals) {
-                _xifexpression = it.toLowerCase();
-              } else {
-                String _xifexpression_1 = null;
-                boolean _equals_1 = Objects.equal(it, "RETURN");
-                if (_equals_1) {
-                  _xifexpression_1 = "ret";
-                } else {
-                  _xifexpression_1 = it;
-                }
-                _xifexpression = _xifexpression_1;
-              }
-              _builder.append(_xifexpression);
-              _builder.append(" = [];");
-              _builder.newLineIfNotEmpty();
-              {
-                boolean _notEquals_1 = (!Objects.equal(it, "RETURN"));
-                if (_notEquals_1) {
-                  _builder.append("map.set(\"");
-                  String _xifexpression_2 = null;
-                  boolean _equals_2 = Objects.equal(it, "ADD");
-                  if (_equals_2) {
-                    _xifexpression_2 = it.toLowerCase();
-                  } else {
-                    _xifexpression_2 = it;
-                  }
-                  _builder.append(_xifexpression_2);
-                  _builder.append("\", ");
-                  String _xifexpression_3 = null;
-                  boolean _equals_3 = Objects.equal(it, "ADD");
-                  if (_equals_3) {
-                    _xifexpression_3 = it.toLowerCase();
-                  } else {
-                    _xifexpression_3 = it;
-                  }
-                  _builder.append(_xifexpression_3);
-                  _builder.append(");");
-                  _builder.newLineIfNotEmpty();
-                }
-              }
-            }
-          }
-        }
-      }
-      {
-        if (hasMerge) {
-          _builder.append("const merge = [];");
-          _builder.newLine();
-        }
-      }
+      _builder.append("«FOR it : annotationList»«IF it != \"MERGE\"»");
+      _builder.newLine();
+      _builder.append("const «if (it == \"ADD\") it.toLowerCase else if (it == \"RETURN\") \"ret\" else it» = [];");
+      _builder.newLine();
+      _builder.append("«IF it != \"RETURN\"»");
+      _builder.newLine();
+      _builder.append("map.set(\"«if (it == \"ADD\") it.toLowerCase else it»\", «if (it == \"ADD\") it.toLowerCase else it»);");
+      _builder.newLine();
+      _builder.append("«ENDIF»«ENDIF»«ENDFOR»");
+      _builder.newLine();
+      _builder.append("«IF hasMerge»");
+      _builder.newLine();
+      _builder.append("const merge = [];");
+      _builder.newLine();
+      _builder.append("«ENDIF»");
+      _builder.newLine();
       _builder.append("const n = ctx.childCount;");
       _builder.newLine();
       _builder.append("for (let i = 0; i < n;++i) {");
@@ -1402,76 +1310,59 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
       _builder.append("switch (it.invokingState) {");
       _builder.newLine();
       _builder.append("\t\t\t");
-      final HashSet<Integer> stateList = CollectionLiterals.<Integer>newHashSet();
-      _builder.newLineIfNotEmpty();
-      {
-        for(final Element it_1 : elementList) {
-          _builder.append("\t\t\t");
-          final EObject atom = it_1.getBody();
-          _builder.newLineIfNotEmpty();
-          {
-            if ((atom instanceof Atom)) {
-              _builder.append("\t\t\t");
-              final EObject ref = ((Atom)atom).getBody();
-              _builder.newLineIfNotEmpty();
-              {
-                if ((ref instanceof RuleRef)) {
-                  _builder.append("\t\t\t");
-                  final Integer invokingState = this.getInvokingState(r);
-                  _builder.newLineIfNotEmpty();
-                  {
-                    boolean _add = stateList.add(invokingState);
-                    if (_add) {
-                      _builder.append("\t\t\t");
-                      _builder.append("case ");
-                      _builder.append(invokingState, "\t\t\t");
-                      _builder.append(": {");
-                      _builder.newLineIfNotEmpty();
-                      _builder.append("\t\t\t");
-                      _builder.append("\t");
-                      String _xifexpression_4 = null;
-                      if ((Objects.equal(it_1.getOp(), "MERGE") || Objects.equal(it_1.getOp(), "ADD"))) {
-                        _xifexpression_4 = it_1.getOp().toLowerCase();
-                      } else {
-                        String _xifexpression_5 = null;
-                        String _op = it_1.getOp();
-                        boolean _equals_4 = Objects.equal(_op, "RETURN");
-                        if (_equals_4) {
-                          _xifexpression_5 = "ret";
-                        } else {
-                          _xifexpression_5 = it_1.getOp();
-                        }
-                        _xifexpression_4 = _xifexpression_5;
-                      }
-                      _builder.append(_xifexpression_4, "\t\t\t\t");
-                      _builder.append(".push(");
-                      {
-                        if (((r.getType() != null) && (r.getType().getType().getDir() != null))) {
-                          _builder.append("this.flatten(");
-                        }
-                      }
-                      _builder.append("this.visit(it)");
-                      {
-                        if (((r.getType() != null) && (r.getType().getType().getDir() != null))) {
-                          _builder.append(")");
-                        }
-                      }
-                      _builder.append(");");
-                      _builder.newLineIfNotEmpty();
-                      _builder.append("\t\t\t");
-                      _builder.append("}");
-                      _builder.newLine();
-                      _builder.append("\t\t\t");
-                      _builder.append("break;");
-                      _builder.newLine();
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      _builder.append("«val stateList = newHashSet»");
+      _builder.newLine();
+      _builder.append("\t\t\t");
+      _builder.append("«FOR it : elementList»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«val atom = it.body»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«IF atom instanceof Atom»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("«val ref = atom.body»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("«IF ref instanceof RuleRef»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("«val invokingState = r.getInvokingState»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("«IF stateList.add(invokingState)»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t");
+      _builder.append("case «invokingState»: {");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t");
+      _builder.append("«if (it.op == \"MERGE\" || it.op == \"ADD\") it.op.toLowerCase ");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t");
+      _builder.append("else if (it.op == \"RETURN\") \"ret\" ");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t");
+      _builder.append("else it.op».push(«IF r.type !== null && r.type.type.dir !== null»this.flatten(«ENDIF»this.visit(it)«IF r.type !== null && r.type.type.dir !== null»)«ENDIF»);");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t");
+      _builder.append("break;");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t\t");
+      _builder.append("«ENDFOR»");
+      _builder.newLine();
       _builder.append("\t\t\t");
       _builder.append("default: {");
       _builder.newLine();
@@ -1494,59 +1385,44 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
       _builder.append("switch (it.symbol.type) {");
       _builder.newLine();
       _builder.append("\t\t\t");
-      final HashSet<String> nameList = CollectionLiterals.<String>newHashSet();
-      _builder.newLineIfNotEmpty();
-      {
-        for(final Element it_2 : elementList) {
-          _builder.append("\t\t\t");
-          final EObject atom_1 = it_2.getBody();
-          _builder.newLineIfNotEmpty();
-          {
-            if ((atom_1 instanceof Atom)) {
-              _builder.append("\t\t\t");
-              final EObject ref_1 = ((Atom)atom_1).getBody();
-              _builder.newLineIfNotEmpty();
-              {
-                if (((ref_1 instanceof Terminal) && nameList.add(this.getTerminalName(it_2)))) {
-                  _builder.append("\t\t\t");
-                  _builder.append("case ");
-                  _builder.append(this._grammarName, "\t\t\t");
-                  _builder.append("Parser.");
-                  String _terminalName = this.getTerminalName(it_2);
-                  _builder.append(_terminalName, "\t\t\t");
-                  _builder.append(": {");
-                  _builder.newLineIfNotEmpty();
-                  _builder.append("\t\t\t");
-                  _builder.append("\t");
-                  String _xifexpression_6 = null;
-                  if ((Objects.equal(it_2.getOp(), "MERGE") || Objects.equal(it_2.getOp(), "ADD"))) {
-                    _xifexpression_6 = it_2.getOp().toLowerCase();
-                  } else {
-                    String _xifexpression_7 = null;
-                    String _op_1 = it_2.getOp();
-                    boolean _equals_5 = Objects.equal(_op_1, "RETURN");
-                    if (_equals_5) {
-                      _xifexpression_7 = "ret";
-                    } else {
-                      _xifexpression_7 = it_2.getOp();
-                    }
-                    _xifexpression_6 = _xifexpression_7;
-                  }
-                  _builder.append(_xifexpression_6, "\t\t\t\t");
-                  _builder.append(".push(this.flatten(this.visit(it)));");
-                  _builder.newLineIfNotEmpty();
-                  _builder.append("\t\t\t");
-                  _builder.append("}");
-                  _builder.newLine();
-                  _builder.append("\t\t\t");
-                  _builder.append("break;");
-                  _builder.newLine();
-                }
-              }
-            }
-          }
-        }
-      }
+      _builder.append("«val nameList = newHashSet»");
+      _builder.newLine();
+      _builder.append("\t\t\t");
+      _builder.append("«FOR it : elementList»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«val atom = it.body»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«IF atom instanceof Atom»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("«val ref = atom.body»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("«IF ref instanceof Terminal && nameList.add(it.terminalName)»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("case «_grammarName»Parser.«it.terminalName»: {");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t");
+      _builder.append("«if (it.op == \"MERGE\" || it.op == \"ADD\") it.op.toLowerCase else if (it.op == \"RETURN\") \"ret\" else it.op».push(this.flatten(this.visit(it)));");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("break;");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t\t");
+      _builder.append("«ENDFOR»");
+      _builder.newLine();
       _builder.append("\t\t\t");
       _builder.append("default: {");
       _builder.newLine();
@@ -1567,155 +1443,157 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
       _builder.newLine();
       _builder.append("}");
       _builder.newLine();
-      {
-        if (hasReturn) {
-          _builder.append("if (!ret.isEmpty()) {");
-          _builder.newLine();
-          _builder.append("\t");
-          _builder.append("return ret;");
-          _builder.newLine();
-          _builder.append("}");
-          _builder.newLine();
-        }
-      }
-      {
-        UnicoenTypeDec _type = r.getType();
-        boolean _tripleNotEquals = (_type != null);
-        if (_tripleNotEquals) {
-          {
-            String _name = r.getType().getType().getName();
-            boolean _tripleNotEquals_1 = (_name != null);
-            if (_tripleNotEquals_1) {
-              {
-                if (hasMerge) {
-                  _builder.append("let node = this.castTo(map, ");
-                  String _name_1 = r.getType().getType().getName();
-                  _builder.append(_name_1);
-                  _builder.append(");");
-                  _builder.newLineIfNotEmpty();
-                  _builder.append("if(typeof node === \'object\' && \'merge\' in node){");
-                  _builder.newLine();
-                  _builder.append("\t");
-                  _builder.append("merge.forEach((it:any) => { node.merge(this.castTo(it, ");
-                  String _name_2 = r.getType().getType().getName();
-                  _builder.append(_name_2, "\t");
-                  _builder.append("));});");
-                  _builder.newLineIfNotEmpty();
-                  _builder.append("} else {");
-                  _builder.newLine();
-                  _builder.append("\t");
-                  _builder.append("node = new ");
-                  String _name_3 = r.getType().getType().getName();
-                  _builder.append(_name_3, "\t");
-                  _builder.append("();");
-                  _builder.newLineIfNotEmpty();
-                  _builder.append("\t");
-                  _builder.append("merge.forEach((it:any) => { node.merge(this.castTo(it, ");
-                  String _name_4 = r.getType().getType().getName();
-                  _builder.append(_name_4, "\t");
-                  _builder.append("));});");
-                  _builder.newLineIfNotEmpty();
-                  _builder.append("}");
-                  _builder.newLine();
-                } else {
-                  _builder.append("const node = this.castTo(map, ");
-                  String _name_5 = r.getType().getType().getName();
-                  _builder.append(_name_5);
-                  _builder.append(");");
-                  _builder.newLineIfNotEmpty();
-                }
-              }
-              _builder.append("return node;");
-              _builder.newLine();
-            } else {
-              {
-                String _dir = r.getType().getType().getDir();
-                boolean _equals_6 = Objects.equal(_dir, ">");
-                if (_equals_6) {
-                  _builder.append("add.reverse();");
-                  _builder.newLine();
-                }
-              }
-              _builder.append("const node = add[0] as UniExpr;");
-              _builder.newLine();
-              _builder.append("for (Object obj : add) {");
-              _builder.newLine();
-              _builder.append("\t");
-              _builder.append("switch (obj) {");
-              _builder.newLine();
-              {
-                EList<QualifiedId> _fieldvalue = r.getType().getType().getFieldvalue();
-                for(final QualifiedId field : _fieldvalue) {
-                  _builder.append("\t\t");
-                  String _get = field.getName().get(0);
-                  _builder.append(_get, "\t\t");
-                  _builder.append(": {");
-                  _builder.newLineIfNotEmpty();
-                  _builder.append("\t\t");
-                  _builder.append("\t");
-                  _builder.append("obj.");
-                  String _get_1 = field.getName().get(1);
-                  _builder.append(_get_1, "\t\t\t");
-                  _builder.append(" = node");
-                  _builder.newLineIfNotEmpty();
-                  _builder.append("\t\t");
-                  _builder.append("\t");
-                  _builder.append("node = obj");
-                  _builder.newLine();
-                  _builder.append("\t\t");
-                  _builder.append("}");
-                  _builder.newLine();
-                }
-              }
-              _builder.append("\t");
-              _builder.append("}");
-              _builder.newLine();
-              _builder.append("}");
-              _builder.newLine();
-              _builder.append("return node;");
-              _builder.newLine();
-            }
-          }
-        } else {
-          {
-            if (hasMerge) {
-              _builder.append("merge.forEach [");
-              _builder.newLine();
-              _builder.append("\t");
-              _builder.append("if (it instanceof Map<?, ?>) {");
-              _builder.newLine();
-              _builder.append("\t\t");
-              _builder.append("it.forEach [ k, v |");
-              _builder.newLine();
-              _builder.append("\t\t\t");
-              _builder.append("if (map.containsKey(k)) {");
-              _builder.newLine();
-              _builder.append("\t\t\t\t");
-              _builder.append("map.get(k) += v");
-              _builder.newLine();
-              _builder.append("\t\t\t");
-              _builder.append("} else {");
-              _builder.newLine();
-              _builder.append("\t\t\t\t");
-              _builder.append("map.put(k, v as ArrayList<Object>)");
-              _builder.newLine();
-              _builder.append("\t\t\t");
-              _builder.append("}");
-              _builder.newLine();
-              _builder.append("\t\t");
-              _builder.append("]");
-              _builder.newLine();
-              _builder.append("\t");
-              _builder.append("}");
-              _builder.newLine();
-              _builder.append("]");
-              _builder.newLine();
-            }
-          }
-          _builder.append("return map;");
-          _builder.newLine();
-        }
-      }
+      _builder.append("«IF hasReturn»");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("if (!ret.isEmpty()) {");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("return ret;");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("«IF r.type !== null»");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("«IF r.type.type.name !== null»");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("«IF hasMerge»");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("let node = this.castTo(map, «r.type.type.name»);");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("if(typeof node === \'object\' && \'merge\' in node){");
+      _builder.newLine();
+      _builder.append("\t\t\t");
+      _builder.append("merge.forEach((it:any) => { node.merge(this.castTo(it, «r.type.type.name»));});");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("} else {");
+      _builder.newLine();
+      _builder.append("\t\t\t");
+      _builder.append("node = new «r.type.type.name»();");
+      _builder.newLine();
+      _builder.append("\t\t\t");
+      _builder.append("merge.forEach((it:any) => { node.merge(this.castTo(it, «r.type.type.name»));});");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("«ELSE»");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("const node = this.castTo(map, «r.type.type.name»);");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("return node;");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("«ELSE»");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("«IF r.type.type.dir == \'>\'»");
+      _builder.newLine();
+      _builder.append("\t\t\t");
+      _builder.append("add.reverse();");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("const node = add[0] as UniExpr;");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("for (Object obj : add) {");
+      _builder.newLine();
+      _builder.append("\t\t\t");
+      _builder.append("switch (obj) {");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«FOR field:r.type.type.fieldvalue»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«field.name.get(0)»: {");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("obj.«field.name.get(1)» = node");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("node = obj");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«ENDFOR»");
+      _builder.newLine();
+      _builder.append("\t\t\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("return node;");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("«ELSE»");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("«IF hasMerge»");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("merge.forEach [");
+      _builder.newLine();
+      _builder.append("\t\t\t");
+      _builder.append("if (it instanceof Map<?, ?>) {");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("it.forEach [ k, v |");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("if (map.containsKey(k)) {");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("map.get(k) += v");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("} else {");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("map.put(k, v as ArrayList<Object>)");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("]");
+      _builder.newLine();
+      _builder.append("\t\t\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("]");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("return map;");
+      _builder.newLine();
+      _builder.append("«ENDIF»");
+      _builder.newLine();
       _xblockexpression = _builder;
     }
     return _xblockexpression;
@@ -1820,64 +1698,22 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
       _builder.newLine();
       _builder.append("map.set(\"none\", none);");
       _builder.newLine();
-      {
-        for(final String it : annotationList) {
-          {
-            boolean _notEquals = (!Objects.equal(it, "MERGE"));
-            if (_notEquals) {
-              _builder.append("const ");
-              String _xifexpression = null;
-              boolean _equals = Objects.equal(it, "ADD");
-              if (_equals) {
-                _xifexpression = it.toLowerCase();
-              } else {
-                String _xifexpression_1 = null;
-                boolean _equals_1 = Objects.equal(it, "RETURN");
-                if (_equals_1) {
-                  _xifexpression_1 = "ret";
-                } else {
-                  _xifexpression_1 = it;
-                }
-                _xifexpression = _xifexpression_1;
-              }
-              _builder.append(_xifexpression);
-              _builder.append(" = [];");
-              _builder.newLineIfNotEmpty();
-              {
-                boolean _notEquals_1 = (!Objects.equal(it, "RETURN"));
-                if (_notEquals_1) {
-                  _builder.append("map.set(\"");
-                  String _xifexpression_2 = null;
-                  boolean _equals_2 = Objects.equal(it, "ADD");
-                  if (_equals_2) {
-                    _xifexpression_2 = it.toLowerCase();
-                  } else {
-                    _xifexpression_2 = it;
-                  }
-                  _builder.append(_xifexpression_2);
-                  _builder.append("\", ");
-                  String _xifexpression_3 = null;
-                  boolean _equals_3 = Objects.equal(it, "ADD");
-                  if (_equals_3) {
-                    _xifexpression_3 = it.toLowerCase();
-                  } else {
-                    _xifexpression_3 = it;
-                  }
-                  _builder.append(_xifexpression_3);
-                  _builder.append(");");
-                  _builder.newLineIfNotEmpty();
-                }
-              }
-            }
-          }
-        }
-      }
-      {
-        if (hasMerge) {
-          _builder.append("const merge = [];");
-          _builder.newLine();
-        }
-      }
+      _builder.append("«FOR it : annotationList»«IF it != \"MERGE\"»");
+      _builder.newLine();
+      _builder.append("const «if (it == \"ADD\") it.toLowerCase else if (it == \"RETURN\") \"ret\" else it» = [];");
+      _builder.newLine();
+      _builder.append("«IF it != \"RETURN\"»");
+      _builder.newLine();
+      _builder.append("map.set(\"«if (it == \"ADD\") it.toLowerCase else it»\", «if (it == \"ADD\") it.toLowerCase else it»);");
+      _builder.newLine();
+      _builder.append("«ENDIF»«ENDIF»«ENDFOR»");
+      _builder.newLine();
+      _builder.append("«IF hasMerge»");
+      _builder.newLine();
+      _builder.append("const merge = [];");
+      _builder.newLine();
+      _builder.append("«ENDIF»");
+      _builder.newLine();
       _builder.append("const n = ctx.childCount;");
       _builder.newLine();
       _builder.append("if (0<n) {");
@@ -1895,109 +1731,92 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
       _builder.append("switch (it.invokingState) {");
       _builder.newLine();
       _builder.append("\t\t\t\t");
-      final HashSet<Integer> stateList = CollectionLiterals.<Integer>newHashSet();
-      _builder.newLineIfNotEmpty();
-      {
-        for(final Element it_1 : elementList) {
-          _builder.append("\t\t\t\t");
-          final EObject atom = it_1.getBody();
-          _builder.newLineIfNotEmpty();
-          {
-            if ((atom instanceof Atom)) {
-              _builder.append("\t\t\t\t");
-              final EObject ref = ((Atom)atom).getBody();
-              _builder.newLineIfNotEmpty();
-              {
-                if ((ref instanceof RuleRef)) {
-                  _builder.append("\t\t\t\t");
-                  final Integer invokingState = this.getInvokingState(r);
-                  _builder.newLineIfNotEmpty();
-                  {
-                    boolean _add = stateList.add(invokingState);
-                    if (_add) {
-                      _builder.append("\t\t\t\t");
-                      _builder.append("case ");
-                      _builder.append(invokingState, "\t\t\t\t");
-                      _builder.append(": {");
-                      _builder.newLineIfNotEmpty();
-                      {
-                        String _op = it_1.getOp();
-                        boolean _equals_4 = Objects.equal(_op, "ADD");
-                        if (_equals_4) {
-                          _builder.append("\t\t\t\t");
-                          _builder.append("\t");
-                          _builder.append("const results = this.flatten(this.visit(it));");
-                          _builder.newLine();
-                          _builder.append("\t\t\t\t");
-                          _builder.append("\t");
-                          _builder.append("if(Array.isArray(results)){");
-                          _builder.newLine();
-                          _builder.append("\t\t\t\t");
-                          _builder.append("\t");
-                          _builder.append("\t");
-                          _builder.append("for (const result of results)");
-                          _builder.newLine();
-                          _builder.append("\t\t\t\t");
-                          _builder.append("\t");
-                          _builder.append("\t\t");
-                          _builder.append("add.push(result);");
-                          _builder.newLine();
-                          _builder.append("\t\t\t\t");
-                          _builder.append("\t");
-                          _builder.append("}");
-                          _builder.newLine();
-                          _builder.append("\t\t\t\t");
-                          _builder.append("\t");
-                          _builder.append("else");
-                          _builder.newLine();
-                          _builder.append("\t\t\t\t");
-                          _builder.append("\t");
-                          _builder.append("\t");
-                          _builder.append("add.push(results);");
-                          _builder.newLine();
-                        }
-                      }
-                      {
-                        String _op_1 = it_1.getOp();
-                        boolean _notEquals_2 = (!Objects.equal(_op_1, "ADD"));
-                        if (_notEquals_2) {
-                          _builder.append("\t\t\t\t");
-                          _builder.append("\t");
-                          String _xifexpression_4 = null;
-                          String _op_2 = it_1.getOp();
-                          boolean _equals_5 = Objects.equal(_op_2, "MERGE");
-                          if (_equals_5) {
-                            _xifexpression_4 = it_1.getOp().toLowerCase();
-                          } else {
-                            String _xifexpression_5 = null;
-                            String _op_3 = it_1.getOp();
-                            boolean _equals_6 = Objects.equal(_op_3, "RETURN");
-                            if (_equals_6) {
-                              _xifexpression_5 = "ret";
-                            } else {
-                              _xifexpression_5 = it_1.getOp();
-                            }
-                            _xifexpression_4 = _xifexpression_5;
-                          }
-                          _builder.append(_xifexpression_4, "\t\t\t\t\t");
-                          _builder.append(".push(this.visit(it));");
-                          _builder.newLineIfNotEmpty();
-                        }
-                      }
-                      _builder.append("\t\t\t\t");
-                      _builder.append("}");
-                      _builder.newLine();
-                      _builder.append("\t\t\t\t");
-                      _builder.append("break;");
-                      _builder.newLine();
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      _builder.append("«val stateList = newHashSet»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«FOR it : elementList»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("«val atom = it.body»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("«IF atom instanceof Atom»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("«val ref = atom.body»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("«IF ref instanceof RuleRef»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t");
+      _builder.append("«val invokingState = r.getInvokingState»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t");
+      _builder.append("«IF stateList.add(invokingState)»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t");
+      _builder.append("case «invokingState»: {");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t");
+      _builder.append("«IF (it.op == \"ADD\")»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t\t");
+      _builder.append("const results = this.flatten(this.visit(it));");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t\t");
+      _builder.append("if(Array.isArray(results)){");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t\t\t");
+      _builder.append("for (const result of results)");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t\t\t\t");
+      _builder.append("add.push(result);");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t\t");
+      _builder.append("else");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t\t\t");
+      _builder.append("add.push(results);");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t");
+      _builder.append("«IF it.op != \"ADD\"»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t\t");
+      _builder.append("«if (it.op == \"MERGE\") it.op.toLowerCase ");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t\t\t");
+      _builder.append("else if (it.op == \"RETURN\") \"ret\" ");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t\t\t");
+      _builder.append("else it.op».push(this.visit(it));");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t\t");
+      _builder.append("«ENDIF»\t");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t");
+      _builder.append("break;");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«ENDFOR»");
+      _builder.newLine();
       _builder.append("\t\t\t\t");
       _builder.append("default: {");
       _builder.newLine();
@@ -2020,59 +1839,44 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
       _builder.append("switch (it.symbol.type) {");
       _builder.newLine();
       _builder.append("\t\t\t\t");
-      final HashSet<String> nameList = CollectionLiterals.<String>newHashSet();
-      _builder.newLineIfNotEmpty();
-      {
-        for(final Element it_2 : elementList) {
-          _builder.append("\t\t\t\t");
-          final EObject atom_1 = it_2.getBody();
-          _builder.newLineIfNotEmpty();
-          {
-            if ((atom_1 instanceof Atom)) {
-              _builder.append("\t\t\t\t");
-              final EObject ref_1 = ((Atom)atom_1).getBody();
-              _builder.newLineIfNotEmpty();
-              {
-                if (((ref_1 instanceof Terminal) && nameList.add(this.getTerminalName(it_2)))) {
-                  _builder.append("\t\t\t\t");
-                  _builder.append("case ");
-                  _builder.append(this._grammarName, "\t\t\t\t");
-                  _builder.append("Parser.");
-                  String _terminalName = this.getTerminalName(it_2);
-                  _builder.append(_terminalName, "\t\t\t\t");
-                  _builder.append(": {");
-                  _builder.newLineIfNotEmpty();
-                  _builder.append("\t\t\t\t");
-                  _builder.append("\t");
-                  String _xifexpression_6 = null;
-                  if ((Objects.equal(it_2.getOp(), "MERGE") || Objects.equal(it_2.getOp(), "ADD"))) {
-                    _xifexpression_6 = it_2.getOp().toLowerCase();
-                  } else {
-                    String _xifexpression_7 = null;
-                    String _op_4 = it_2.getOp();
-                    boolean _equals_7 = Objects.equal(_op_4, "RETURN");
-                    if (_equals_7) {
-                      _xifexpression_7 = "ret";
-                    } else {
-                      _xifexpression_7 = it_2.getOp();
-                    }
-                    _xifexpression_6 = _xifexpression_7;
-                  }
-                  _builder.append(_xifexpression_6, "\t\t\t\t\t");
-                  _builder.append(".push(this.visit(it));");
-                  _builder.newLineIfNotEmpty();
-                  _builder.append("\t\t\t\t");
-                  _builder.append("}");
-                  _builder.newLine();
-                  _builder.append("\t\t\t\t");
-                  _builder.append("break;");
-                  _builder.newLine();
-                }
-              }
-            }
-          }
-        }
-      }
+      _builder.append("«val nameList = newHashSet»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«FOR it : elementList»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("«val atom = it.body»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("«IF atom instanceof Atom»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("«val ref = atom.body»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("«IF ref instanceof Terminal && nameList.add(it.terminalName)»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t");
+      _builder.append("case «_grammarName»Parser.«it.terminalName»: {");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t\t");
+      _builder.append("«if (it.op == \"MERGE\" || it.op == \"ADD\") it.op.toLowerCase else if (it.op == \"RETURN\") \"ret\" else it.op».push(this.visit(it));");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t\t");
+      _builder.append("break;");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t\t");
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("\t\t\t\t");
+      _builder.append("«ENDFOR»");
+      _builder.newLine();
       _builder.append("\t\t\t\t");
       _builder.append("default: {");
       _builder.newLine();
@@ -2096,67 +1900,45 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
       _builder.newLine();
       _builder.append("}");
       _builder.newLine();
-      {
-        if (hasReturn) {
-          _builder.append("if (!ret.isEmpty()) {");
-          _builder.newLine();
-          _builder.append("\t");
-          _builder.append("return ret;");
-          _builder.newLine();
-          _builder.append("}");
-          _builder.newLine();
-        }
-      }
-      _builder.append("const node = ");
-      {
-        UnicoenTypeDec _type = r.getType();
-        boolean _tripleEquals = (_type == null);
-        if (_tripleEquals) {
-          _builder.append("map");
-        }
-      }
-      {
-        UnicoenTypeDec _type_1 = r.getType();
-        boolean _tripleNotEquals = (_type_1 != null);
-        if (_tripleNotEquals) {
-          _builder.append("this.castTo");
-          {
-            if ((!hasMerge)) {
-              _builder.append("List");
-            }
-          }
-          _builder.append("(map, ");
-          _builder.append(itemClassName);
-          _builder.append(")");
-        }
-      }
-      _builder.newLineIfNotEmpty();
-      {
-        if ((!hasMerge)) {
-          _builder.append("return node;");
-          _builder.newLine();
-        }
-      }
-      {
-        if (hasMerge) {
-          _builder.append("const ret = [];");
-          _builder.newLine();
-          _builder.append("this.castToList(merge, ");
-          _builder.append(itemClassName);
-          _builder.append(").forEach( (it:any) => {");
-          _builder.newLineIfNotEmpty();
-          _builder.append("\t");
-          _builder.append("it.merge(node);");
-          _builder.newLine();
-          _builder.append("\t");
-          _builder.append("ret.push(it);");
-          _builder.newLine();
-          _builder.append("});");
-          _builder.newLine();
-          _builder.append("return ret;");
-          _builder.newLine();
-        }
-      }
+      _builder.append("«IF hasReturn»");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("if (!ret.isEmpty()) {");
+      _builder.newLine();
+      _builder.append("\t\t");
+      _builder.append("return ret;");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("}");
+      _builder.newLine();
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("const node = «IF r.type === null»map«ENDIF»«IF r.type !== null»this.castTo«IF !hasMerge»List«ENDIF»(map, «itemClassName»)«ENDIF»");
+      _builder.newLine();
+      _builder.append("«IF !hasMerge»");
+      _builder.newLine();
+      _builder.append("return node;");
+      _builder.newLine();
+      _builder.append("«ENDIF»");
+      _builder.newLine();
+      _builder.append("«IF hasMerge»");
+      _builder.newLine();
+      _builder.append("const ret = [];");
+      _builder.newLine();
+      _builder.append("this.castToList(merge, «itemClassName»).forEach( (it:any) => {");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("it.merge(node);");
+      _builder.newLine();
+      _builder.append("\t");
+      _builder.append("ret.push(it);");
+      _builder.newLine();
+      _builder.append("});");
+      _builder.newLine();
+      _builder.append("return ret;");
+      _builder.newLine();
+      _builder.append("«ENDIF»");
+      _builder.newLine();
       _xblockexpression = _builder;
     }
     return _xblockexpression;
@@ -2189,16 +1971,10 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
   
   public CharSequence makeLiteralMethod(final ParserRule r) {
     StringConcatenation _builder = new StringConcatenation();
-    String _camelCase = this.toCamelCase(r.getName());
-    final String methodName = ("visit" + _camelCase);
-    _builder.newLineIfNotEmpty();
-    _builder.append("public ");
-    _builder.append(methodName);
-    _builder.append("(ctx:");
-    String _camelCase_1 = this.toCamelCase(r.getName());
-    _builder.append(_camelCase_1);
-    _builder.append("Context) {");
-    _builder.newLineIfNotEmpty();
+    _builder.append("«val methodName = \"visit\" + r.name.toCamelCase»");
+    _builder.newLine();
+    _builder.append("public «methodName»(ctx:«r.name.toCamelCase»Context) {");
+    _builder.newLine();
     _builder.append("\t");
     _builder.append("const findFirst = (ctx) => {");
     _builder.newLine();
@@ -2214,38 +1990,33 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("\t\t\t");
     _builder.append("if (it instanceof TerminalNode) {");
     _builder.newLine();
-    {
-      List<Element> _list = IteratorExtensions.<Element>toList(Iterators.<Element>filter(r.eAllContents(), Element.class));
-      for(final Element it : _list) {
-        {
-          String _op = it.getOp();
-          boolean _tripleNotEquals = (_op != null);
-          if (_tripleNotEquals) {
-            {
-              String _op_1 = it.getOp();
-              boolean _equals = Objects.equal(_op_1, "value");
-              if (_equals) {
-                _builder.append("\t\t\t\t");
-                _builder.append("if (it.symbol.type == ");
-                _builder.append(this._grammarName, "\t\t\t\t");
-                _builder.append("Parser.");
-                String _terminalName = this.getTerminalName(it);
-                _builder.append(_terminalName, "\t\t\t\t");
-                _builder.append(") {");
-                _builder.newLineIfNotEmpty();
-                _builder.append("\t\t\t\t");
-                _builder.append("\t");
-                _builder.append("return it;");
-                _builder.newLine();
-                _builder.append("\t\t\t\t");
-                _builder.append("}");
-                _builder.newLine();
-              }
-            }
-          }
-        }
-      }
-    }
+    _builder.append("\t\t\t\t");
+    _builder.append("«FOR it : r.eAllContents.filter(Element).toList»");
+    _builder.newLine();
+    _builder.append("\t\t\t\t\t");
+    _builder.append("«IF it.op !== null»");
+    _builder.newLine();
+    _builder.append("\t\t\t\t\t\t");
+    _builder.append("«IF it.op == \"value\"»");
+    _builder.newLine();
+    _builder.append("\t\t\t\t\t\t\t");
+    _builder.append("if (it.symbol.type == «_grammarName»Parser.«it.terminalName») {");
+    _builder.newLine();
+    _builder.append("\t\t\t\t\t\t\t\t");
+    _builder.append("return it;");
+    _builder.newLine();
+    _builder.append("\t\t\t\t\t\t\t");
+    _builder.append("}");
+    _builder.newLine();
+    _builder.append("\t\t\t\t\t\t");
+    _builder.append("«ENDIF»");
+    _builder.newLine();
+    _builder.append("\t\t\t\t\t");
+    _builder.append("«ENDIF»");
+    _builder.newLine();
+    _builder.append("\t\t\t\t");
+    _builder.append("«ENDFOR»");
+    _builder.newLine();
     _builder.append("\t\t\t");
     _builder.append("}");
     _builder.newLine();
@@ -2261,53 +2032,45 @@ public class UniMapperGeneratorGenerator extends AbstractGenerator {
     _builder.append("\t");
     _builder.append("const text = this.visit(findFirst(ctx)) as String;");
     _builder.newLine();
-    {
-      String _name = r.getType().getType().getName();
-      boolean _equals_1 = Objects.equal(_name, "UniIntLiteral");
-      if (_equals_1) {
-        _builder.append("\t");
-        _builder.append("return new UniIntLiteral(Number(text));");
-        _builder.newLine();
-      } else {
-        String _name_1 = r.getType().getType().getName();
-        boolean _equals_2 = Objects.equal(_name_1, "UniBoolLiteral");
-        if (_equals_2) {
-          _builder.append("\t");
-          _builder.append("return new UniBoolLiteral(Boolean(text));");
-          _builder.newLine();
-        } else {
-          String _name_2 = r.getType().getType().getName();
-          boolean _equals_3 = Objects.equal(_name_2, "UniDoubleLiteral");
-          if (_equals_3) {
-            _builder.append("\t");
-            _builder.append("return new UniDoubleLiteral(Number(text));");
-            _builder.newLine();
-          } else {
-            String _name_3 = r.getType().getType().getName();
-            boolean _equals_4 = Objects.equal(_name_3, "UniStringLiteral");
-            if (_equals_4) {
-              _builder.append("\t");
-              _builder.append("return new UniStringLiteral(text.substring(1, text.length - 1));");
-              _builder.newLine();
-            } else {
-              String _name_4 = r.getType().getType().getName();
-              boolean _equals_5 = Objects.equal(_name_4, "UniCharacterLiteral");
-              if (_equals_5) {
-                _builder.append("\t");
-                _builder.append("return new UniCharacterLiteral(text.substring(1, text.length - 1));");
-                _builder.newLine();
-              } else {
-                _builder.append("\t");
-                _builder.append("throw new RuntimeException(\"Unimplemented Method: ");
-                _builder.append(methodName, "\t");
-                _builder.append("\");");
-                _builder.newLineIfNotEmpty();
-              }
-            }
-          }
-        }
-      }
-    }
+    _builder.append("\t");
+    _builder.append("«IF r.type.type.name == \"UniIntLiteral\"»");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("return new UniIntLiteral(Number(text));");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("«ELSEIF r.type.type.name == \"UniBoolLiteral\"»");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("return new UniBoolLiteral(Boolean(text));");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("«ELSEIF r.type.type.name == \"UniDoubleLiteral\"»");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("return new UniDoubleLiteral(Number(text));");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("«ELSEIF r.type.type.name == \"UniStringLiteral\"»");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("return new UniStringLiteral(text.substring(1, text.length - 1));");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("«ELSEIF r.type.type.name == \"UniCharacterLiteral\"»");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("return new UniCharacterLiteral(text.substring(1, text.length - 1));");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("«ELSE»");
+    _builder.newLine();
+    _builder.append("\t\t");
+    _builder.append("throw new RuntimeException(\"Unimplemented Method: «methodName»\");");
+    _builder.newLine();
+    _builder.append("\t");
+    _builder.append("«ENDIF»");
+    _builder.newLine();
     _builder.append("}");
     _builder.newLine();
     return _builder;
