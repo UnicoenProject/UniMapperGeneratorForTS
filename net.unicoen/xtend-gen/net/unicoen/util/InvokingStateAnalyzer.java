@@ -65,6 +65,7 @@ public class InvokingStateAnalyzer {
               } else {
                 final String refName = ((RuleRef)ref).getReference().getName();
                 StringConcatenation _builder_1 = new StringConcatenation();
+                _builder_1.append("this.");
                 _builder_1.append(refName);
                 _builder_1.append("(");
                 pos = code.indexOf(_builder_1.toString(), pos);
