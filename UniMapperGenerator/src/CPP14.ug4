@@ -568,7 +568,12 @@ myclassbody=>List<UniVariableDec>
 // classspecifier does not work
 myclassspecifier=>UniClassDec
 :
-	myclasshead$MERGE  '{' myclassbody$members '}' ';'
+	myclasshead$MERGE  '{' myclassbody$members '}'
+;
+
+myclassspecifierstatement=>UniClassDec
+:
+	myclassspecifier ';'
 ;
 
 myclasshead=>UniClassDec
@@ -582,7 +587,7 @@ declaration
 	variabledeclarationstatement
 	| functiondeclarationstatement
 	| blockdeclaration
-	| myclassspecifier//additionally
+	| myclassspecifierstatement//additionally
 	| functiondefinition
 	| templatedeclaration
 	| explicitinstantiation
