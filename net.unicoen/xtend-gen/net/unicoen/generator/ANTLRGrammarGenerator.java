@@ -187,7 +187,6 @@ public class ANTLRGrammarGenerator {
             pb.start().waitFor();
           } catch (final Throwable _t) {
             if (_t instanceof IOException) {
-              final IOException e = (IOException)_t;
               System.out.println("npm command cannot be executed!");
               System.out.println("Please install node.js and npm.");
             } else {
@@ -214,7 +213,6 @@ public class ANTLRGrammarGenerator {
             pb.start().waitFor();
           } catch (final Throwable _t) {
             if (_t instanceof Exception) {
-              final Exception e = (Exception)_t;
               System.out.println("\"npx antlr4ts\" command cannot be executed!");
             } else {
               throw Exceptions.sneakyThrow(_t);
