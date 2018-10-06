@@ -3,7 +3,7 @@
 Requirements
 ---
 
-* [Eclipse (Java Developers)](https://eclipse.org/) (Tested with 4.7.3 Oxygen) 
+* [Eclipse (Java Developers)](https://eclipse.org/) (Tested with 4.9.0 SimRel 2018‑09) 
 * [Xtext & Xtend](https://www.eclipse.org/xtend/download.html) (Tested with 2.15.0) 
 * [Node.js 8.2.0+](https://nodejs.org/ja/)
   * npm(5.2.0+)
