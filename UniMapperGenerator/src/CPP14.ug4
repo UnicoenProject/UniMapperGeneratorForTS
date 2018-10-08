@@ -392,10 +392,10 @@ assignmentoperator
 	| '|='
 ;
 
-expression
+expression => UniBinOp
 :
-	assignmentexpression
-	| expression ',' assignmentexpression
+	assignmentexpression$RETURN
+	| expression$left Comma$operator assignmentexpression$right
 ;
 
 constantexpression
