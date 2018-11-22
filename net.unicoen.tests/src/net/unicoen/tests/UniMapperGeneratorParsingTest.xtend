@@ -25,6 +25,6 @@ class UniMapperGeneratorParsingTest {
 		''')
 		Assert.assertNotNull(result)
 		val errors = result.eResource.errors
-		Assert.assertTrue('''Unexpected errors: áerrors.join(", ")â''', errors.isEmpty)
+		Assert.assertTrue('''Unexpected errors: Â«errors.join(", ")Â»''', errors.isEmpty)
 	}
 }
