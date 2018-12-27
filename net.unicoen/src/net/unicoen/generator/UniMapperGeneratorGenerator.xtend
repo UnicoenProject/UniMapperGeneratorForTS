@@ -32,7 +32,7 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 			_grammarName = it.name.toCamelCase
 			val parserCode = g4Generator.generate(_grammarName, it)
 			_analyzer = new InvokingStateAnalyzer(parserCode, it)
-			fsa.generateFile(_grammarName + "Mapper.ts", it.generateMapper)
+			fsa.generateFile(_grammarName + "MapperBase.ts", it.generateMapper)
 		]
 	}
 	
@@ -102,6 +102,8 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 		import { UniSwitchUnit } from '../../node/UniSwitchUnit';
 		import { UniSwitch } from '../../node/UniSwitch';
 		import { UniProgram } from '../../node/UniProgram';
+		import { SyntaxErrorListener } from '../SyntaxErrorListener';
+		import { SyntaxErrorData } from '../SyntaxErrorData';
 	'''
 
 	def generateMapper(Grammar g) '''
@@ -113,7 +115,7 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 			}
 		}
 		
-		export class «_grammarName»Mapper implements «_grammarName»Visitor<any> {
+		export class «_grammarName»MapperBase implements «_grammarName»Visitor<any> {
 		
 			private isDebugMode:boolean = false;
 			private parser:«_grammarName»Parser;
@@ -126,26 +128,38 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 				this.isDebugMode = isDebugMode;
 			}
 			
-			getRawTree(code) {
-				const chars = new ANTLRInputStream(code);
-				const lexer = new «_grammarName»Lexer(chars);
-				const tokens = new CommonTokenStream(lexer);
-				this.parser = new «_grammarName»Parser(tokens);
-				const tree = this.parser.translationunit();
-				return [tree, this.parser];
+			preProcess(text: string): string {
+				return text;
 			}
-		
-			parse(code:string) {
-				return this.parseCore(new ANTLRInputStream(code));
-			}
-		
 			
-			parseCore(chars:ANTLRInputStream) {
+			parseToANTLRTree(code):ParserRuleContext {
+				const preProcessedCode = this.preProcess(code);
+				const chars = new ANTLRInputStream(preProcessedCode);
 				const lexer = new «_grammarName»Lexer(chars);
 				const tokens = new CommonTokenStream(lexer);
 				this.parser = new «_grammarName»Parser(tokens);
+				this.parser.addErrorListener(new SyntaxErrorListener<any>());
 				const tree = this.parser.«g.root.root.name»();
-		
+				return tree;
+			}
+
+			parseToUniTree(code:string) {
+				const antTree = this.parseToANTLRTree(code);
+				const uniTree = this.makeUniTree(antTree, <CommonTokenStream>this.parser.inputStream)
+				return uniTree;
+			}
+			checkSyntaxError(code: string): SyntaxErrorData[] {
+				const antTree = this.parseToANTLRTree(code);
+				const errorListeners = this.parser.getErrorListeners();
+				for (const errorListener of errorListeners) {
+					if (errorListener instanceof SyntaxErrorListener ){
+						return errorListener.getErrorMessages();
+					}
+				}
+				return [];
+			}		
+
+			makeUniTree(tree: ParserRuleContext, tokens: CommonTokenStream) {
 				this._comments = [];
 				this._stream = tokens;
 				this._lastNode = null;
