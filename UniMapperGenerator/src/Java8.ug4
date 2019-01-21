@@ -838,7 +838,7 @@ labeledStatementNoShortIf
 	:	Identifier ':' statementNoShortIf
 	;
 
-expressionStatement => UniBinOp  //後で消すーアブストラクトではな�?インスタンスを作る為に書くだ�?
+expressionStatement => UniBinOp
 	:	statementExpression$RETURN ';'
 	;
 
@@ -946,16 +946,16 @@ enhancedForStatementNoShortIf
 	:	'for' '(' variableModifier* unannType variableDeclaratorId ':' expression ')' statementNoShortIf
 	;
 
-breakStatement
+breakStatement => UniBreak
 	:	'break' Identifier? ';'
 	;
 
-continueStatement
+continueStatement => UniContinue
 	:	'continue' Identifier? ';'
 	;
 
-returnStatement
-	:	'return' expression? ';'
+returnStatement => UniReturn
+	:	'return' expression?$value ';'
 	;
 
 throwStatement
@@ -1140,26 +1140,26 @@ fieldAccess_lfno_primary
 	|	typeName '.' 'super' '.' Identifier
 	;
 
-arrayAccess
-	:	(	expressionName '[' expression ']'
-		|	primaryNoNewArray_lfno_arrayAccess '[' expression ']'
+arrayAccess => UniBinOp
+	:	(	expressionName$left LBRACK$operator expression$right RBRACK$operator
+		|	primaryNoNewArray_lfno_arrayAccess$left LBRACK$operator expression$right RBRACK$operator
 		)
-		(	primaryNoNewArray_lf_arrayAccess '[' expression ']'
+		(	primaryNoNewArray_lf_arrayAccess$left LBRACK$operator expression$right RBRACK$operator
 		)*
 	;
 
 arrayAccess_lf_primary
-	:	(	primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary '[' expression ']'
+	:	(	primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary$left LBRACK$operator expression$right RBRACK$operator
 		)
-		(	primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary '[' expression ']'
+		(	primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary$left LBRACK$operator expression$right RBRACK$operator
 		)*
 	;
 
-arrayAccess_lfno_primary
-	:	(	expressionName '[' expression ']'
-		|	primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary '[' expression ']'
+arrayAccess_lfno_primary => UniBinOp
+	:	(	expressionName$left LBRACK$operator expression$right RBRACK$operator
+		|	primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary$left LBRACK$operator expression$right RBRACK$operator
 		)
-		(	primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary '[' expression ']'
+		(	primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary$left LBRACK$operator expression$right RBRACK$operator
 		)*
 	;
 
