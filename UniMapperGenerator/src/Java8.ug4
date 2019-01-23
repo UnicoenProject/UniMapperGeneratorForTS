@@ -229,7 +229,9 @@ typeName
 	:	Identifier
 	|	packageOrTypeName '.' Identifier
 	;
-
+typeNameIdent => UniIdent
+	:	typeName$name
+	;
 packageOrTypeName
 	:	Identifier
 	|	packageOrTypeName '.' Identifier
@@ -260,7 +262,7 @@ packageDeclaration
 packageModifier
 	:	annotation
 	;
-
+		
 importDeclaration
 	:	singleTypeImportDeclaration
 	|	typeImportOnDemandDeclaration
@@ -268,19 +270,19 @@ importDeclaration
 	|	staticImportOnDemandDeclaration
 	;
 
-singleTypeImportDeclaration
-	:	'import' typeName ';'
+singleTypeImportDeclaration  => UniImportDec
+	:	'import' typeName$name ';'
 	;
 
-typeImportOnDemandDeclaration
-	:	'import' packageOrTypeName '.' '*' ';'
+typeImportOnDemandDeclaration  => UniImportDec
+	:	'import' packageOrTypeName$name '.' mul$ondemand ';'
 	;
 
-singleStaticImportDeclaration
+singleStaticImportDeclaration  => UniImportDec
 	:	'import' 'static' typeName '.' Identifier ';'
 	;
 
-staticImportOnDemandDeclaration
+staticImportOnDemandDeclaration  => UniImportDec
 	:	'import' 'static' typeName '.' '*' ';'
 	;
 
@@ -1188,12 +1190,12 @@ methodInvocation_lf_primary
 	:	'.' typeArguments? Identifier '(' argumentList? ')'
 	;
 
-methodInvocation_lfno_primary
-	:	methodName '(' argumentList? ')'
-	|	typeName '.' typeArguments? Identifier '(' argumentList? ')'
-	|	expressionName '.' typeArguments? Identifier '(' argumentList? ')'
-	|	'super' '.' typeArguments? Identifier '(' argumentList? ')'
-	|	typeName '.' 'super' '.' typeArguments? Identifier '(' argumentList? ')'
+methodInvocation_lfno_primary => UniMethodCall
+	:	methodName$methodName '(' argumentList?$args ')'
+	|	typeNameIdent$receiver '.' typeArguments?$receiver ident$methodName '(' argumentList?$args ')'
+	|	expressionName$receiver '.' typeArguments?$receiver ident$methodName '(' argumentList?$args ')'
+	|	'super' '.' typeArguments?$receiver ident$methodName '(' argumentList?$args ')'
+	|	typeNameIdent$receiver '.' 'super' '.' typeArguments? ident$methodName '(' argumentList?$args ')'
 	;
 
 argumentList=>List<UniExpr>

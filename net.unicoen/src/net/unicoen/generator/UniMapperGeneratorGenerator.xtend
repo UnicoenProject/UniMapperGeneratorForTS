@@ -87,6 +87,7 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 		import { UniFor } from '../../node/UniFor';
 		import { UniIdent } from '../../node/UniIdent';
 		import { UniIf } from '../../node/UniIf';
+		import { UniImportDec } from '../../node/UniImportDec';
 		import { UniIntLiteral } from '../../node/UniIntLiteral';		
 		import { UniMethodCall } from '../../node/UniMethodCall';
 		import { UniNew } from '../../node/UniNew';
