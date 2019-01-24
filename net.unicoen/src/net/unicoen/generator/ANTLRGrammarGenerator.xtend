@@ -198,7 +198,7 @@ class ANTLRGrammarGenerator {
 	def dispatch compile(Import i) '''«IF !i.alias.empty»«i.alias» = «ENDIF»«i.importURI»'''
 
 	def dispatch compile(V4Tokens v4) {
-		'''«v4.keyword» «FOR t : v4.tokens»«IF !v4.tokens.get(0).equals(t)», «ENDIF»«t.compile»«ENDFOR»'''
+		'''«v4.keyword» «FOR t : v4.tokens»«IF !v4.tokens.get(0).equals(t)», «ENDIF»«t.compile»«ENDFOR»}'''
 	}
 
 	def dispatch compile(V4Token v4) '''«v4.name»'''
@@ -210,7 +210,7 @@ class ANTLRGrammarGenerator {
 	def dispatch compile(V3Token v3) '''«v3.name»«IF !v3.value.empty» = «v3.value»«ENDIF»;'''
 
 	def dispatch compile(GrammarAction ga) '''@«IF !ga.scope.nullOrEmpty»«ga.scope» «ga.colonSymbol» «ENDIF»«ga.name» «ga.
-		action»
+		action.substring(1, ga.action.length-1)»
 '''
 
 	def dispatch compile(Mode m) '''mode «m.id»;«FOR lr : m.rules»«lr.compile»«ENDFOR»'''
@@ -250,7 +250,7 @@ class ANTLRGrammarGenerator {
 
 	def dispatch compile(Ebnf eb) '''«eb.body.compile»«IF eb.operator != null»«eb.operator.compile»«ENDIF»'''
 
-	def dispatch compile(ActionElement ae) '''«ae.body»«IF ae.options != null»«ae.options.compile»«ENDIF»'''
+	def dispatch compile(ActionElement ae) '''«ae.body.substring(1, ae.body.length-1)»«IF ae.options != null»«ae.options.compile»«ENDIF»'''
 
 	def dispatch compile(LabeledElement le) '''«le.name» «le.op» «le.body.compile»'''
 

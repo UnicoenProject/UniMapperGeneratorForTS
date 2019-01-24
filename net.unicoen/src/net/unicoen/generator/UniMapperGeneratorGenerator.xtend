@@ -92,6 +92,7 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 		import { UniMethodCall } from '../../node/UniMethodCall';
 		import { UniNew } from '../../node/UniNew';
 		import { UniNewArray } from '../../node/UniNewArray';
+		import { UniNoneLiteral } from '../../node/UniNoneLiteral';
 		import { UniWhile } from '../../node/UniWhile';
 		import { UniUnaryOp } from '../../node/UniUnaryOp';
 		import { UniTernaryOp } from '../../node/UniTernaryOp';
@@ -108,6 +109,7 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 		import { Mapper } from '../mapper/Mapper';
 		
 		import '../../node_helper/Extension';
+		import { RuntimeException } from '../Engine/RuntimeException';
 	'''
 
 	def generateMapper(Grammar g) '''
@@ -471,6 +473,8 @@ class UniMapperGeneratorGenerator extends AbstractGenerator {
 				return new UniIntLiteral(Number(text));
 			«ELSEIF r.type.type.name == "UniBoolLiteral"»
 				return new UniBoolLiteral(Boolean(text));
+			«ELSEIF r.type.type.name == "UniNoneLiteral"»
+				return new UniNoneLiteral(text.substring(1, text.length - 1));				
 			«ELSEIF r.type.type.name == "UniDoubleLiteral"»
 				return new UniDoubleLiteral(Number(text));
 			«ELSEIF r.type.type.name == "UniStringLiteral"»

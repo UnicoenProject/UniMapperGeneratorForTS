@@ -355,7 +355,8 @@ terminal fragment XDIGIT:
 
 /** Language action (a.k.a language code) */
 terminal ACTION:
-	NESTED_ACTION;
+	'#{'->'}#';
+//	NESTED_ACTION;
 
 terminal fragment NESTED_ACTION:
 	'___nested_action_';
