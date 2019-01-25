@@ -30,7 +30,7 @@
  */
 
 grammar Python3;
-root file_input;
+root translationunit;
 
 // All comments that start with "///" are copy-pasted from
 // The Python Language Reference: https://docs.python.org/3.3/reference/grammar.html
@@ -156,14 +156,14 @@ tokens { INDENT, DEDENT }
  * parser rules
  */
 
-translationunit
+translationunit => UniBlock
 :
-	file_input? EOF2
+	file_input?$body EOF2
 ;
 
 single_input: NEWLINE | simple_stmt | compound_stmt NEWLINE;
-file_input
-: (NEWLINE | stmt)*
+file_input => List<UniExpr>
+: (NEWLINE | stmt$ADD)*
 ;
 //eval_input: testlist NEWLINE* EOF;
 
@@ -189,23 +189,55 @@ varargslist: (vfpdef ('=' test)? (',' vfpdef ('=' test)?)* (',' (
 );
 vfpdef: NAME;
 
+stmts => List<UniExpr>
+:
+	stmt+$ADD
+;
 stmt: simple_stmt | compound_stmt;
-simple_stmt: small_stmt (';' small_stmt)* (';')? NEWLINE;
+simple_stmt => List<UniExpr>
+: 
+	 small_stmt$RETURN NEWLINE
+	|small_stmt (';' small_stmt)+ (';')? NEWLINE	
+;
 small_stmt: (expr_stmt | del_stmt | pass_stmt | flow_stmt |
              import_stmt | global_stmt | nonlocal_stmt | assert_stmt);
-expr_stmt: testlist_star_expr (annassign | augassign (yield_expr|testlist) |
-                     ('=' (yield_expr|testlist_star_expr))*);
-annassign: ':' test ('=' test)?;
-testlist_star_expr: (test|star_expr) (',' (test|star_expr))* (',')?;
+expr_stmt => UniBinOp
+: 
+	test_star_expr$RETURN // addtional
+|	testlist_star_expr$left augassign$operator expr_stmt_right$right
+|	testlist_star_expr$left ASSIGN$operator expr_stmt_right$right
+;
+
+expr_stmt_right => UniBinOp
+:
+	test_star_expr$RETURN
+	| expr_stmt_right$left COLON$operator test$right // annassign: ':' test ('=' test)?;
+	| expr_stmt_right$left augassign$operator (yield_expr|testlist$right)
+	| expr_stmt_right$left (ASSIGN$operator (yield_expr|testlist_star_expr$right))
+;
+
+test_star_expr
+: 
+	test|star_expr
+;
+testlist_star_expr_array => List<UniExpr>
+: 
+	test_star_expr$ADD (',' test_star_expr$ADD)* (',')?
+;
+testlist_star_expr => UniArray
+: 
+	test_star_expr$RETURN
+	|testlist_star_expr_array$items
+;
 augassign: ('+=' | '-=' | '*=' | '@=' | '/=' | '%=' | '&=' | '|=' | '^=' |
             '<<=' | '>>=' | '**=' | '//=');
 // For normal and annotated assignments, additional restrictions enforced by the interpreter
 del_stmt: 'del' exprlist;
 pass_stmt: 'pass';
 flow_stmt: break_stmt | continue_stmt | return_stmt | raise_stmt | yield_stmt;
-break_stmt: 'break';
-continue_stmt: 'continue';
-return_stmt: 'return' (testlist)?;
+break_stmt=>UniBreak: 'break';
+continue_stmt=>UniContinue: 'continue';
+return_stmt=>UniReturn: 'return' (testlist$value)?;
 yield_stmt: yield_expr;
 raise_stmt: 'raise' (test ('from' test)?)?;
 import_stmt: import_name | import_from;
@@ -224,9 +256,19 @@ assert_stmt: 'assert' test (',' test)?;
 
 compound_stmt: if_stmt | while_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated | async_stmt;
 async_stmt: ASYNC (funcdef | with_stmt | for_stmt);
-if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ('else' ':' suite)?;
-while_stmt: 'while' test ':' suite ('else' ':' suite)?;
-for_stmt: 'for' exprlist 'in' testlist ':' suite ('else' ':' suite)?;
+if_stmt => UniIf
+: 
+	'if' test$cond ':' suite$trueStatement ('elif' test ':' suite)* ('else' ':' suite$falseStatement)?
+;
+
+while_stmt => UniWhile
+:
+	'while' test$cond ':' suite$statement ('else' ':' suite)?
+;
+for_stmt => UniEnhancedFor
+:
+	'for' exprlist$name 'in' testlist$container ':' suite$statement ('else' ':' suite)?
+;
 try_stmt: ('try' ':' suite
            ((except_clause ':' suite)+
             ('else' ':' suite)?
@@ -236,40 +278,159 @@ with_stmt: 'with' with_item (',' with_item)*  ':' suite;
 with_item: test ('as' expr)?;
 // NB compile.c makes sure that the default except clause is last
 except_clause: 'except' (test ('as' NAME)?)?;
-suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT;
+suite => UniBlock
+: 
+	simple_stmt$RETURN | NEWLINE INDENT stmts$body DEDENT
+;
 
 test: or_test ('if' or_test 'else' test)? | lambdef;
 test_nocond: or_test | lambdef_nocond;
 lambdef: 'lambda' (varargslist)? ':' test;
 lambdef_nocond: 'lambda' (varargslist)? ':' test_nocond;
-or_test: and_test ('or' and_test)*;
-and_test: not_test ('and' not_test)*;
-not_test: 'not' not_test | comparison;
-comparison: expr (comp_op expr)*;
+
+or_test => UniBinOp
+:
+	and_test$RETURN
+	| or_test$left OR$operator and_test$right
+;
+and_test => UniBinOp
+:
+	not_test$RETURN
+	| and_test$left AND$operator not_test$right
+;
+
+not_test => UniUnaryOp
+:
+	comparison$RETURN
+	| NOT$operator not_test$expr
+;
+
+comparison => UniBinOp
+:
+	expr$RETURN
+	| comparison$left comp_op$operator expr$right
+;
 // <> isn't actually a valid comparison operator in Python. It's here for the
 // sake of a __future__ import described in PEP 401 (which really works :-)
 comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'not' 'in'|'is'|'is' 'not';
-star_expr: '*' expr;
-expr: xor_expr ('|' xor_expr)*;
-xor_expr: and_expr ('^' and_expr)*;
-and_expr: shift_expr ('&' shift_expr)*;
-shift_expr: arith_expr (('<<'|'>>') arith_expr)*;
-arith_expr: term (('+'|'-') term)*;
-term: factor (('*'|'@'|'/'|'%'|'//') factor)*;
-factor: ('+'|'-'|'~') factor | power;
-power: atom_expr ('**' factor)?;
-atom_expr: (AWAIT)? atom trailer*;
+star_expr => UniUnaryOp
+: 
+	STAR$operator expr$expr
+;
+expr => UniBinOp
+:
+	xor_expr$RETURN
+	| expr$left OR_OP$operator xor_expr$right
+;
+xor_expr => UniBinOp
+:
+	and_expr$RETURN
+	| xor_expr$left XOR$operator and_expr$right
+;
+and_expr => UniBinOp
+:
+	shift_expr$RETURN
+	| and_expr$left AND_OP$operator shift_expr$right
+;
+shift_expr => UniBinOp
+:
+	arith_expr$RETURN
+	| shift_expr$left Shifts$operator arith_expr$right
+;
+Shifts:	LEFT_SHIFT|RIGHT_SHIFT;
+arith_expr => UniBinOp
+:
+	term$RETURN
+	| arith_expr$left AddMinus$operator term$right
+;
+AddMinus:ADD | MINUS;
+term => UniBinOp
+:
+	factor$RETURN
+	| term$left TermOp$operator factor$right
+;
+TermOp:'*'|'@'|'/'|'%'|'//';
+factor => UniUnaryOp
+:
+	power$RETURN
+	| FactorOp$operator factor$expr
+;
+FactorOp: '+'|'-'|'~';
+power => UniBinOp
+:
+	atom_expr$RETURN
+	| atom_expr$left POWER$operator factor$right
+;
+
+atom_expr => UniBinOp
+:
+  atom$RETURN
+ | method_call_of_method_return$RETURN
+ | method_call_no_arg$RETURN
+ |(AWAIT)? atom$left trailer$right
+;
+
 atom: ('(' (yield_expr|testlist_comp)? ')' |
-       '[' (testlist_comp)? ']' |
+       array |
        '{' (dictorsetmaker)? '}' |
-       NAME | NUMBER | STRING+ | '...' | 'None' | 'True' | 'False');
-testlist_comp: (test|star_expr) ( comp_for | (',' (test|star_expr))* (',')? );
-trailer: '(' (arglist)? ')' | '[' subscriptlist ']' | '.' NAME;
+       ident | number | STRING+ | '...' | 'None' | bool);
+
+array => UniArray
+:
+	'[' (testlist_comp$items)? ']' |
+;
+ident => UniIdent
+:
+    NAME$name
+;
+bool => UniBoolLiteral
+:
+    TRUE$value
+    |FALSE$value
+;
+
+testlist_comp => List<UniExpr>
+:
+	test_star_expr$ADD ( comp_for | (',' test_star_expr$ADD)* (',')? )
+;
+trailer => List<UniExpr>
+: 
+	(method_call$ADD| array_access$ADD | field_access$ADD)*
+;
+method_call_of_method_return => UniBinOp
+:
+	method_call_no_arg$left DOT$operator method_call_no_arg$right
+;
+method_call_no_arg => UniMethodCall
+:
+	atom$methodName '(' ')'
+;
+method_call => UniMethodCall
+:
+	'(' (arglist$args) ')'
+;
+array_access => UniBinOp
+:
+	OPEN_BRACK$operator subscriptlist$right CLOSE_BRACK$operator
+;
+field_access => UniBinOp
+:
+	DOT$operator atom_expr$right //NAME -> test
+;
+
 subscriptlist: subscript (',' subscript)* (',')?;
 subscript: test | (test)? ':' (test)? (sliceop)?;
 sliceop: ':' (test)?;
 exprlist: (expr|star_expr) (',' (expr|star_expr))* (',')?;
-testlist: test (',' test)* (',')?;
+testlist_array => List<UniExpr>
+: 
+	test$ADD (',' test$ADD)* (',')?
+;
+testlist => UniArray
+: 
+	test$RETURN
+	|testlist_array$items
+;
 dictorsetmaker: ( ((test ':' test | '**' expr)
                    (comp_for | (',' (test ':' test | '**' expr))* (',')?)) |
                   ((test | star_expr)
@@ -277,7 +438,10 @@ dictorsetmaker: ( ((test ':' test | '**' expr)
 
 classdef: 'class' NAME ('(' (arglist)? ')')? ':' suite;
 
-arglist: argument (',' argument)*  (',')?;
+arglist => List<UniExpr>
+:
+	argument$ADD (',' argument$ADD)*  (',')?
+;
 
 // The reason that keywords are test nodes instead of NAME is that using NAME
 // results in an ambiguity. ast.c makes sure it's a NAME.
@@ -302,6 +466,24 @@ encoding_decl: NAME;
 
 yield_expr: 'yield' (yield_arg)?;
 yield_arg: 'from' test | testlist;
+number
+:
+	integer
+	|float
+	|imaginary
+;
+integer => UniIntLiteral
+:
+	INTEGER$value
+;
+float => UniDoubleLiteral
+:
+	FLOAT_NUMBER$value
+;
+imaginary => UniDoubleLiteral
+:
+	IMAG_NUMBER$value
+;
 
 /*
  * lexer rules
@@ -310,12 +492,6 @@ yield_arg: 'from' test | testlist;
 STRING
  : STRING_LITERAL
  | BYTES_LITERAL
- ;
-
-NUMBER
- : INTEGER
- | FLOAT_NUMBER
- | IMAG_NUMBER
  ;
 
 INTEGER
